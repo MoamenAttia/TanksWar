@@ -4,10 +4,13 @@
 ;01 right
 ;10 left  
 include test.inc
-include map.inc
+include map.inc 
+include CheckBulletThroughWall.inc
 .model medium
 .stack 64d
-.data
+.data       
+BulletCoordinates dw 00d,00d 
+AllBullets dw 0000H,0000H
 ;user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
 ;tank1 dw 30d,110d,70d,110d,70d,170d,30d,170d,  40d,125d,60d,125d,60d,155d,40d,155d, 48d,120d,52d,120d,52d,125d,48d,125d, 50d,140d ,0d ;three rectangles 2 words tankcenter  more word for hp and orientation
 ;shoots1 dw 5d,0d
@@ -39,7 +42,8 @@ main proc far
     mov al,12h
     int 10h   
     
-    SetMap
+    SetMap  
+    CheckBulletThroughWall
     ;mov bx ,offset tank1
 ;    mov cx ,13d
 ;    loop1:
