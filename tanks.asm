@@ -9,21 +9,21 @@ include test.inc
 .data
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
 tank1 dw 30d,110d,70d,110d,70d,170d,30d,170d,  40d,125d,60d,125d,60d,155d,40d,155d, 48d,120d,52d,120d,52d,125d,48d,125d, 50d,140d ,0701h ;three rectangles 2 words tankcenter  more word for hp and orientation
-shots1 dw 5d,0d
-dw ?,?,?
-dw ?,?,?
-dw ?,?,?
-dw ?,?,?
-dw ?,?,?
+shots1 dw 5d,1d
+dw 150,0,0
+dw 0,0,0
+dw 0,0,0
+dw 0,0,0
+dw 0,0,0
 
 user2 label byte; +48 to get center + 52 to get orientation and hp word
 tank2 dw 130d,110d,170d,110d,170d,170d,130d,170d, 140d,125d,160d,125d,160d,155d,140d,155d, 148d,120d,152d,120d,152d,125d,148d,125d, 150d,140d ,0d
 shots2 dw 5d,0d
-dw ?,?,?
-dw ?,?,?
-dw ?,?,?
-dw ?,?,?
-dw ?,?,?   
+dw 0,0,0
+dw 0,0,0
+dw 0,0,0
+dw 0,0,0
+dw 0,0,0   
 
 mes dw '  ' ,'$$'
 integar db ' '
@@ -51,17 +51,22 @@ main proc far
         call drawpx
         add bx,4d
     loop loop2
-    l1: 
-        mov bx,offset shots1
-        call inputshots
-        mov bx, offset shots1+4
-        call drawshot
-       ; mov bx, offset shots1
-       ;call process_shots
+    l1:   
+        ;---------------------------------
+        mov bx,offset shots1 ;bx on shots1(2)
+        ;call inputshots 
+        ;---------------------------------
+        ;mov bx, offset shots1 ;bx on shots1(2)
+        ;call drawshot
+        ;---------------------------------
+        mov bx, offset shots1
+        mov di, offset tank2
+        call process_shots  ;bx on shots1(2) of attacker tank2(1) and di on victm tank
+        ;---------------------------------
         mov ax,tank1 + 52d
         add ah ,'0'
-        
-        mov mes ,ah
+        xor al,al
+        mov mes ,ax
         PrintString mes 
     jz l1
     hlt
@@ -142,7 +147,7 @@ inputshots proc near
     ret
 inputshots endp
 
-process_shots proc near
+process_shots proc near   ;bx on shots of attacker tank and di on victm tank
     pusha
     mov cx,[bx]+2 
     cmp cx,0
@@ -150,27 +155,34 @@ process_shots proc near
     popa
     ret
     cont:
-    add bx,4
+    add bx,4 ; no bx on first shot
     moveshots:
+        push cx
         mov ax,[bx]+4
         cas_1:    
             cmp al , 0d
             jnz cas_2
-            mov si,[bx +2]
+            mov si,[bx +2] 
+            cmp si,2
+            jb cas_2 ; over flow check
             sub si ,2
             mov [bx+2],si
             jmp finish2
         cas_2:
             cmp al ,1d
             jnz cas_3
-            mov si,[bx]
-            add si ,2
+            mov si,[bx] 
+            cmp si,0fffdh ; over flow check
+            jg cas_3
+            add si ,2 
             mov [bx],si
             jmp finish2
         cas_3:    
             cmp al , 2d 
             jnz cas_4
             mov si,[bx]
+            cmp si,2
+            jb cas_4 ; over flow check
             sub si ,2
             mov [bx],si 
             jmp finish2
@@ -178,18 +190,101 @@ process_shots proc near
             cmp al , 3d
             jnz finish2
             mov si,[bx +2]
+            cmp si,0fffdh ; over flow check
+            jg finish2
             add si ,2d
             mov [bx+2],si
-        finish2:
-        add bx,6d
-    loop moveshots
+        finish2:        ; moving one point the process point
+         
+        ;get smallest and bigest x  
+        push di
+        mov ax,[di] ;max x
+        mov dx,ax   ;min x
+        add di,4
+        
+        mov cx,3
+        get_min_max_x:
+           cmp ax,[di]
+           ja here
+               mov ax,[di]
+               jmp skip
+           here:
+           cmp dx,[di]
+           jb skip
+           mov dx,[di] 
+            
+        skip:
+        add di,4
+        loop get_min_max_x   
+        pop di      
+        
+        ;check point between two xs
+        cmp [bx],dx
+        jb next
+        cmp [bx],ax
+        ja next 
+        
+        ;get smallest and bigest y  
+        push di  
+        add di,2
+        mov ax,[di] ;max y
+        mov dx,ax   ;min y
+        add di,4
+        
+        mov cx,3
+        get_min_max_y:
+           cmp ax,[di]
+           ja here2
+               mov ax,[di]
+               jmp skip2
+           here2:
+           cmp dx,[di]
+           jb skip2
+           mov dx,[di] 
+            
+        skip2:add di,4
+        loop get_min_max_y   
+        pop di   
+        
+        ;check point between two ys
+        cmp [bx+2],dx
+        jb next
+        cmp [bx+2],ax
+        ja next               
+        
+        
+         ; process deleting pixel and decreaing tank hp to be continue
+        
+        
+        
+        
+        
+        next:
+        
+        add bx,6d   
+        pop cx
+    loop moveshots 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     popa
     ret
 process_shots endp
 
 
 drawshot proc near
-    pusha
+    pusha 
+    add bx,4
     mov al ,0ch
     mov cx,[bx]
     mov dx,[bx]+2
