@@ -3,6 +3,7 @@
 ;11 down
 ;01 right
 ;10 left  
+
 include test.inc
 .model medium
 .stack 64d
