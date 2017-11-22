@@ -4,11 +4,22 @@
 ;01 right
 ;10 left  
 include test.inc
-include map.inc 
+include map.inc
+include Display.inc 
 include CheckBulletThroughWall.inc
 .model medium
 .stack 64d
-.data       
+.data                        
+WelcomeMessage db 10,13,10,13,13,13
+               db '**         **  ********  **    ********* ******** ***           *** ********',10,13
+               db '**         **  **        **    ********* *      * ** *        *  ** **' ,10,13
+               db '**         **  **        **    **        *      * **  * *  * *   ** **'  ,10,13
+               db '**   ***   **  ********  **    **        *      * **     **      ** ********'    ,10,13
+               db '** **  ** ***  **        **    ********* *      * **             ** **'  ,10,13
+               db '***      ****  ********  ***** ********* ******** **             ** ********$' 
+              
+DoYoWantToPlay db 10,13,10,13,10,13,'                         If You want to play ,, press any key$'           
+
 BulletCoordinates dw 00d,00d 
 AllBullets dw 0000H,0000H
 ;user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
@@ -38,12 +49,19 @@ main proc far
     mov DS,AX
     mov es,ax    
     
+    Display  WelcomeMessage
+    Display  DoYoWantToPlay
+    
+    mov ah,0
+    int 16h
+    
     mov ah,0
     mov al,12h
     int 10h   
     
     SetMap  
-    CheckBulletThroughWall
+    CheckBulletThroughWall 
+    
     ;mov bx ,offset tank1
 ;    mov cx ,13d
 ;    loop1:
