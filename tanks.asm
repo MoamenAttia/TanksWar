@@ -4,9 +4,24 @@
 ;01 right
 ;10 left  
 include test.inc
+include map.inc
+include Display.inc 
+include CheckBulletThroughWall.inc
 .model medium
 .stack 64d
-.data
+.data                        
+WelcomeMessage db 10,13,10,13,13,13
+               db '**         **  ********  **    ********* ******** ***           *** ********',10,13
+               db '**         **  **        **    ********* *      * ** *        *  ** **' ,10,13
+               db '**         **  **        **    **        *      * **  * *  * *   ** **'  ,10,13
+               db '**   ***   **  ********  **    **        *      * **     **      ** ********'    ,10,13
+               db '** **  ** ***  **        **    ********* *      * **             ** **'  ,10,13
+               db '***      ****  ********  ***** ********* ******** **             ** ********$' 
+              
+DoYoWantToPlay db 10,13,10,13,10,13,'                         If You want to play ,, press any key$'           
+BulletCoordinates dw 00d,00d 
+AllBullets dw 0000H,0000H
+
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
 tank1 dw 30d,110d,70d,110d,70d,170d,30d,170d,  40d,125d,60d,125d,60d,155d,40d,155d, 48d,120d,52d,120d,52d,125d,48d,125d, 50d,140d ,0701h ;three rectangles 2 words tankcenter  more word for hp and orientation
 shots1 dw 5d,1d
@@ -34,41 +49,54 @@ main proc far
     mov DS,AX
     mov es,ax    
     
+    Display  WelcomeMessage
+    Display  DoYoWantToPlay
+    
+    mov ah,0
+    int 16h
+    
     mov ah,0
     mov al,12h
     int 10h   
-    mov bx ,offset tank1
-    mov cx ,13d
-    loop1:
-        mov al ,1d
-        call drawpx
-        add bx,4d
-    loop loop1
-        mov bx ,offset tank2
-        mov cx ,13d
-    loop2:
-        mov al ,2d
-        call drawpx
-        add bx,4d
-    loop loop2
-    l1:   
-        ;---------------------------------
-        mov bx,offset shots1 ;bx on shots1(2)
-        ;call inputshots 
-        ;---------------------------------
-        ;mov bx, offset shots1 ;bx on shots1(2)
-        ;call drawshot
-        ;---------------------------------
-        mov bx, offset shots1
-        mov di, offset tank2
-        call process_shots  ;bx on shots1(2) of attacker tank2(1) and di on victm tank
-        ;---------------------------------
-        mov ax,tank1 + 52d
-        add ah ,'0'
-        xor al,al
-        mov mes ,ax
-        PrintString mes 
-    jz l1
+    
+    SetMap  
+    CheckBulletThroughWall 
+    
+    mov ah,0
+    mov al,12h
+    int 10h
+    ;mov bx ,offset tank1
+    ;mov cx ,13d
+    ;loop1:
+    ;    mov al ,1d
+    ;    call drawpx
+    ;    add bx,4d
+    ;loop loop1
+    ;    mov bx ,offset tank2
+    ;    mov cx ,13d
+    ;loop2:
+    ;    mov al ,2d
+    ;    call drawpx
+    ;    add bx,4d
+    ;loop loop2
+    ;l1:
+    ;    ;---------------------------------
+    ;    mov bx,offset shots1 ;bx on shots1(2)
+    ;    ;call inputshots
+    ;    ;---------------------------------
+    ;    ;mov bx, offset shots1 ;bx on shots1(2)
+    ;    ;call drawshot
+    ;    ;---------------------------------
+    ;    mov bx, offset shots1
+    ;    mov di, offset tank2
+    ;    call process_shots  ;bx on shots1(2) of attacker tank2(1) and di on victm tank
+    ;    ;---------------------------------
+    ;    mov ax,tank1 + 52d
+    ;    add ah ,'0'
+    ;    xor al,al
+    ;    mov mes ,ax
+    ;    PrintString mes
+    ;jz l1    
     hlt
 main endp
 
@@ -338,9 +366,6 @@ drawpx proc near ; draw pixel with color in al
     popa
     ret 
 drawpx endp
-
-
-
 
 
 end main
