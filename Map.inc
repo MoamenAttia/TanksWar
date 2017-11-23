@@ -1,7 +1,6 @@
 SetMap MACRO ;640*480 
 
 ; Frame
-
 mov StartPointX, 0d
 mov StartPointY, 0d
 mov EndPointX, 639d
