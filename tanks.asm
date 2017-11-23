@@ -61,10 +61,6 @@ main proc far
     
     SetMap  
     CheckBulletThroughWall 
-    
-    mov ah,0
-    mov al,12h
-    int 10h
     ;mov bx ,offset tank1
     ;mov cx ,13d
     ;loop1:
