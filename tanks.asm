@@ -4,9 +4,12 @@
 ;01 right
 ;10 left  
 include test.inc
-;include map.inc
-;include Display.inc 
-;include CheckBulletThroughWall.inc
+
+include map.inc   
+include map2.inc
+include Display.inc 
+include CheckBulletThroughWall.inc
+
 .model medium
 .stack 64d
 .data                        
@@ -72,7 +75,9 @@ main proc far
     mov al,12h
     int 10h   
     
-    ;SetMap  
+
+    SetMap
+
     ;CheckBulletThroughWall 
     mov bx ,offset tank1
     mov cx ,13d
