@@ -10,7 +10,7 @@ include map2.inc
 include Display.inc 
 include CheckBulletThroughWall.inc
 
-.model medium
+.model meduim
 .stack 64d
 .data                        
 WelcomeMessage db 10,13,10,13,13,13
@@ -43,7 +43,7 @@ dw 0,0,0
 dw 0,0,0
 
 user2 label byte; +48 to get center + 52 to get orientation and hp word
-tank2 dw 80d,110d,120d,110d,120d,150d,80d,150d,  90d,120d,110d,120d,110d,140d,90d,140d, 95d,115d,105d,115d,105d,120d,95d,120d, 100d,130d ,0711h
+tank2 dw 80d,210d,120d,210d,120d,250d,80d,250d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 100d,230d ,0711h
 shots2 dw 5d,0d
 dw 0,0,0
 dw 0,0,0
@@ -56,7 +56,10 @@ max_x dw 0
 min_y dw 0
 max_y dw 0 
 
-mes dw '  ' ,'$$'
+damagedwall_pos dw ?,? 
+shootspeed dw 2
+
+mes dw 'aaaaaaaaaaaaaaaaaaaaaaaaaa' ,10,13 ,'$$'
 integar db ' '
 
 .code 
@@ -70,15 +73,16 @@ main proc far
     
     ;mov ah,0
     ;int 16h
-    
+    mov bh,0
     mov ah,0
     mov al,12h
     int 10h   
     
-
+    
     SetMap
 
     ;CheckBulletThroughWall 
+    
     mov bx ,offset tank1
     mov cx ,13d
     loop1:
@@ -93,7 +97,9 @@ main proc far
         call drawpx
         add bx,4d
     loop loop2
+
     l1:
+
         ;---------------------------------
         mov bx,offset shots1 ;bx on shots1(2) di for tank1(2)
         mov di,offset tank1
@@ -136,7 +142,20 @@ DrawLine proc near
 	
     popa
     ret
-Drawline endp
+Drawline endp 
+
+
+drawpx proc near ; draw pixel with color in al
+    pusha
+    mov cx,[bx]
+    mov dx,[bx]+2
+    mov ah,0ch
+    mov bh,0
+    int 10h
+    popa
+    ret 
+drawpx endp 
+
 
 
 inputshots proc near
@@ -176,11 +195,11 @@ inputshots proc near
     add bx,4
     add bx,ax 
     ;--------- 
-    mov cx  , [di]+48
+    mov cx  , [di]+48d
     mov [bx], cx
-    mov cx  , [di]+50
+    mov cx  , [di]+50d
     mov [bx] +2 , cx
-    mov cx  , [di]+52
+    mov cx  , [di]+52d
     xor ch,ch  
     mov [bx] +4 ,cx
     and cl ,00000011b
@@ -189,21 +208,21 @@ inputshots proc near
         cmp cl , 0d
         jnz cas2
         mov si,[bx +2]
-        sub si ,21
+        sub si ,21d
         mov [bx+2],si
         jmp finish
     cas2:
         cmp cl ,1d
         jnz cas3
         mov si,[bx]
-        add si ,21
+        add si ,21d
         mov [bx],si
         jmp finish
     cas3:    
         cmp cl , 2d 
         jnz cas4
         mov si,[bx]
-        sub si ,21
+        sub si ,21d
         mov [bx],si 
         jmp finish
     cas4:    
@@ -221,13 +240,14 @@ inputshots endp
 process_shots proc near   ;bx on shots of attacker tank and di on victm tank 
     ;steps
     ;1.process shots 2.draw shots 3.clear and move them 4.repeat
-    pusha  ;no shots to process 
+    pusha  ;now shots to process 
     mov cx,[bx]+2 
     cmp cx,0
     jnz cont
     popa
     ret
-    cont: 
+    cont:
+
 
     ;get smallest and bigest x  
     push di
@@ -283,7 +303,181 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
     add bx,4
     push bx             
     check_del_shots:
-        push cx     
+        push cx        
+        ;first check shots throug wall  
+        mov cx ,[bx] +4
+        and cl ,00000011b
+        mov ax,shootspeed ;this is shoot speed  
+        option1:   
+            cmp cl , 0d
+            jnz option2
+            push cx
+            mov cx,[bx]
+            mov dx,[bx +2] 
+            dec ax ; dec ax counter of loop to use it
+            add dx,ax
+            inc ax ;bring it back
+            push ax 
+            mov ah,0dh
+            ;
+            push bx
+            mov bh,0
+            int 10h
+            pop bx
+            ; 
+            cmp al,3d     ;very very strong wall
+            jnz to1 
+                pop ax
+                pop cx 
+                jmp noneg  ;noneg name has no meaning here it will go to line when i start deleteing node (by chance :D)       
+          to1:   
+            cmp al,0ch    ;strong wall   
+            jz todamge1
+            cmp al,0eh   ;weak wall 
+            jnz to2  
+            
+            
+            todamge1: ; here i should change wall color 
+            mov damagedwall_pos ,cx
+            mov damagedwall_pos +2  ,dx 
+            call damagewall   
+            
+            pop ax
+            pop cx
+            jmp noneg        
+            to2:
+            pop ax
+            pop cx  
+                
+            dec ax
+         jnz option1
+        option2:
+            cmp cl , 1d
+            jnz option3
+            push cx
+            mov cx,[bx]
+            mov dx,[bx +2]
+            dec ax ; dec ax counter of loop to use it
+            add cx,ax
+            inc ax ;bring it back
+            push ax 
+            mov ah,0dh 
+            ;
+            push bx
+            mov bh,0
+            int 10h
+            pop bx 
+            ; 
+            cmp al,3d      ;very very strong wall
+            jnz to11 
+                pop ax
+                pop cx 
+                jmp noneg        
+          to11:
+            cmp al,0ch    ;strong wall   
+            jz todamge2
+            cmp al,0eh   ;weak wall 
+            jnz to22  
+
+            todamge2: ; here i should change wall color 
+            mov damagedwall_pos ,cx
+            mov damagedwall_pos +2  ,dx 
+            call damagewall   
+            
+            pop ax
+            pop cx
+            jmp noneg          
+            to22:
+            pop ax
+            pop cx  
+                
+             dec ax
+         jnz option2
+        option3:    
+            cmp cl , 2d
+            jnz option4
+            push cx
+            mov cx,[bx]
+            mov dx,[bx +2]
+            dec ax ; dec ax counter of loop to use it
+            sub cx,ax
+            inc ax ;bring it back
+            push ax 
+            mov ah,0dh
+            ;
+            push bx
+            mov bh,0
+            int 10h
+            pop bx 
+            ; 
+            cmp al,3d
+            jnz to111 
+                pop ax
+                pop cx 
+                jmp noneg        
+          to111:
+            cmp al,0ch    ;strong color   
+            jz todamge3
+            cmp al,0eh   ;weak color 
+            jnz to222  
+
+            todamge3: ; here i should change wall color 
+            mov damagedwall_pos ,cx
+            mov damagedwall_pos +2  ,dx 
+            call damagewall   
+            
+            pop ax
+            pop cx
+            jmp noneg         
+            to222:
+            pop ax
+            pop cx  
+                
+            dec ax
+         jnz option3
+        option4:    
+            cmp cl , 3d
+            jnz finishcheck
+            push cx
+            mov cx,[bx]
+            mov dx,[bx +2]
+            dec ax ; dec ax counter of loop to use it
+            sub dx,ax
+            inc ax ;bring it back
+            push ax 
+            mov ah,0dh
+            ;
+            push bx
+            mov bh,0
+            int 10h
+            pop bx 
+            ; 
+            cmp al,3d
+            jnz to1111 
+                pop ax
+                pop cx 
+                jmp noneg        
+          to1111:
+            cmp al,0ch    ;strong wall   
+            jz todamge4
+            cmp al,0eh   ;weak wall 
+            jnz to2222  
+
+            todamge4: ; here i should change wall color 
+            mov damagedwall_pos ,cx
+            mov damagedwall_pos +2  ,dx 
+            call damagewall    
+            
+            pop ax
+            pop cx
+            jmp noneg         
+            to2222:
+            pop ax
+            pop cx     
+            dec ax
+         jnz option4
+        finishcheck:  
+   
         ;check point between two xs
         mov ax,min_x
         cmp [bx],ax
@@ -358,21 +552,11 @@ process_shots endp
 
 
 
-drawpx proc near ; draw pixel with color in al
-    pusha
-    mov cx,[bx]
-    mov dx,[bx]+2
-    mov ah,0ch
-    int 10h
-    popa
-    ret 
-drawpx endp 
-
-
-
 
 moveshots proc near
-    pusha
+    pusha  
+    
+    
     mov cx,[bx]-2
     cmp cx,0
     jnz moveshotsloop
@@ -392,7 +576,7 @@ moveshots proc near
             mov si,[bx +2] 
             cmp si,2
             jb cas_2 ; over flow check
-            sub si ,2
+            sub si ,shootspeed
             mov [bx+2],si
             jmp finish2
         cas_2:
@@ -401,16 +585,16 @@ moveshots proc near
             mov si,[bx] 
             cmp si,0fffdh ; over flow check
             ja cas_3
-            add si ,2 
+            add si ,shootspeed 
             mov [bx],si
             jmp finish2
         cas_3:    
             cmp al , 2d 
             jnz cas_4
             mov si,[bx]
-            cmp si,2
+            cmp si,shootspeed
             jb cas_4 ; over flow check
-            sub si ,2
+            sub si ,shootspeed
             mov [bx],si 
             jmp finish2
         cas_4:    
@@ -419,7 +603,7 @@ moveshots proc near
             mov si,[bx +2]
             cmp si,0fffdh ; over flow check
             ja finish2
-            add si ,2d
+            add si ,shootspeed
             mov [bx+2],si
         finish2:
         add bx,6d   
@@ -439,7 +623,7 @@ drawshots proc near
     popa
     ret
     drawshotsloop:
-         mov al ,0ch
+         mov al ,0fh
          call drawpx
          add bx,6d
     loop drawshotsloop
@@ -448,4 +632,174 @@ drawshots proc near
 drawshots endp
 
 
+
+damagewall proc near  
+    pusha 
+    ;----------------------------   1 
+    mov di,21d
+    vrmup:     ;vertical removal up then down
+    mov cx,damagedwall_pos
+    mov dx,damagedwall_pos+ 2
+    sub dx,di
+    ;----
+    push cx
+    push dx
+    push di 
+    mov bh,0
+    mov ah,0dh
+    int 10h
+    pop di
+    pop dx
+    pop cx   
+    ;----
+    cmp al,0ch
+    jz damage1
+    cmp al,0eh
+    jnz remove1
+    mov al,0h
+    jmp remove1
+    damage1:
+    mov al,0eh
+    remove1:
+    
+    mov si ,damagedwall_pos+ 2
+    mov  damagedwall_pos+ 2,dx
+    mov bx,offset damagedwall_pos
+    call drawpx 
+    mov damagedwall_pos +2,si
+
+    dec di
+    jnz vrmup
+    ;------------------------- 
+     ; i wonot process middle pixel as it will be processed in horizontal remove
+    ;----------------------------    2 
+    mov di,21d
+    vrmdw:     ;vertical removal down then down
+    mov cx,damagedwall_pos
+    mov dx,damagedwall_pos+ 2
+    add dx,di
+    ;----
+    push cx
+    push dx
+    push di 
+    mov bh,0
+    mov ah,0dh
+    int 10h
+    pop di
+    pop dx
+    pop cx  
+    ;---- 
+    cmp al,0ch
+    jz damage2
+    cmp al,0eh
+    jnz remove2
+    mov al,0h
+    jmp remove2
+    damage2:
+    mov al,0eh
+    remove2: 
+    
+    mov si ,damagedwall_pos+ 2
+    mov  damagedwall_pos+ 2,dx
+    mov bx,offset damagedwall_pos
+    call drawpx 
+    mov damagedwall_pos +2,si
+
+    dec di
+    jnz vrmdw
+    ;-------------------------  
+    
+    
+    ;----------------------------    3          now horizontal removal right then left
+    mov di,21
+    hrrmr:     ;horizontal remove right 
+    mov cx,damagedwall_pos
+    mov dx,damagedwall_pos+ 2
+    add cx,di
+    ;----
+    push cx
+    push dx
+    push di 
+    mov bh,0
+    mov ah,0dh
+    int 10h
+    pop di
+    pop dx
+    pop cx
+    ;----  
+    cmp al,0ch
+    jz damage3
+    cmp al,0eh
+    jnz remove3
+    mov al,0h
+    jmp remove3
+    damage3:
+    mov al,0eh
+    remove3: 
+    
+    mov si ,damagedwall_pos
+    mov  damagedwall_pos,cx
+    mov bx,offset damagedwall_pos
+    call drawpx 
+    mov damagedwall_pos,si
+    
+    dec di
+    jnz hrrmr
+    ;------------------------- 
+    ;in last loop i removed 20 point right center point so i will go right one step and remove 20 point left ; i will bring it back after all horizontal removing
+    mov ax,damagedwall_pos
+    inc ax
+    mov damagedwall_pos,ax 
+    
+    ;----------------------------    4 
+    mov di,21
+    hrrml:     ;horizontal remove left
+    mov cx,damagedwall_pos
+    mov dx,damagedwall_pos+ 2
+    sub cx,di
+    ;----
+    push cx
+    push dx
+    push di 
+    mov bh,0
+    mov ah,0dh
+    int 10h
+    pop di
+    pop dx
+    pop cx  
+    ;-----
+    cmp al,0ch
+    jz damage4
+    cmp al,0eh
+    jnz remove4
+    mov al,0h
+    jmp remove4
+    damage4:
+    mov al,0eh
+    remove4:  
+    
+    mov si ,damagedwall_pos
+    mov  damagedwall_pos,cx
+    mov bx,offset damagedwall_pos
+    call drawpx 
+    mov damagedwall_pos,si
+
+    dec di
+    jnz hrrml
+    ;-------------------------  
+    
+    ;see comments above 
+    mov ax,damagedwall_pos
+    dec ax
+    mov damagedwall_pos,ax 
+       
+    
+    popa
+    ret
+damagewall endp
+
+
+
 end main
+                                 
+                                 
