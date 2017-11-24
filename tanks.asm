@@ -34,7 +34,7 @@ linecolor   db ,?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
-tank1 dw 30d,110d,70d,110d,70d,150d,30d,150d,  40d,120d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0711h ;three rectangles 2 words tankcenter  more word for hp and orientation
+tank1 dw 30d,110d,70d,110d,70d,150d,30d,150d,  40d,120d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
 shots1 dw 5d,0d
 dw 0,0,0
 dw 0,0,0
@@ -43,7 +43,7 @@ dw 0,0,0
 dw 0,0,0
 
 user2 label byte; +48 to get center + 52 to get orientation and hp word
-tank2 dw 80d,210d,120d,210d,120d,250d,80d,250d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 100d,230d ,0711h
+tank2 dw 80d,110d,120d,110d,120d,150d,80d,150d,  90d,120d,110d,120d,110d,140d,90d,140d, 95d,115d,105d,115d,105d,120d,95d,120d, 100d,130d ,0711h
 shots2 dw 5d,0d
 dw 0,0,0
 dw 0,0,0
@@ -79,7 +79,7 @@ main proc far
     int 10h   
     
     
-    SetMap
+    ;SetMap
 
     ;CheckBulletThroughWall 
     
@@ -199,9 +199,13 @@ inputshots proc near
     mov [bx], cx
     mov cx  , [di]+50d
     mov [bx] +2 , cx
-    mov cx  , [di]+52d
-    xor ch,ch  
+    mov cx  , [di]+52d 
+    and cx,00ffh
     mov [bx] +4 ,cx
+    mov cx  , [di]+52d
+    and cx,0ff1fh
+    or cx ,0010h  
+    mov [di]+52d ,cx   
     and cl ,00000011b
   
     cas1:    
@@ -231,7 +235,9 @@ inputshots proc near
         mov si,[bx +2]
         add si ,21
         mov [bx+2],si
-    finish:
+    finish:      
+     
+    
     ;---------------    
     popa
     ret
@@ -496,9 +502,8 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
                       
         ; process deleting pixel and decreaing tank hp to be continue
         mov ax,[di]+52d 
-        mov dx,[di]+52d
-        xor dh,dh
-        and dl,00fh  
+        mov dx,[bx]+4d
+        shr dl,4
         sub ah,dl
         ja noneg
             mov ah,0 
