@@ -34,7 +34,7 @@ linecolor   db ,?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
-tank1 dw 30d,110d,70d,110d,70d,150d,30d,150d,  40d,120d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0720h ;three rectangles 2 words tankcenter  more word for hp and orientation
+tank1 dw 30d,110d,70d,110d,70d,150d,30d,150d,  40d,120d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
 shots1 dw 5d,0d
 dw 0,0,0
 dw 0,0,0
