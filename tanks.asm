@@ -34,7 +34,7 @@ linecolor   db ,?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
-tank1 dw 30d,110d,70d,110d,70d,150d,30d,150d,  40d,120d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
+tank1 dw 30d,110d,70d,110d,70d,150d,30d,150d,  40d,120d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0720h ;three rectangles 2 words tankcenter  more word for hp and orientation
 shots1 dw 5d,0d
 dw 0,0,0
 dw 0,0,0
@@ -43,7 +43,7 @@ dw 0,0,0
 dw 0,0,0
 
 user2 label byte; +48 to get center + 52 to get orientation and hp word
-tank2 dw 80d,110d,120d,110d,120d,150d,80d,150d,  90d,120d,110d,120d,110d,140d,90d,140d, 95d,115d,105d,115d,105d,120d,95d,120d, 100d,130d ,0711h
+tank2 dw 80d,210d,120d,210d,120d,250d,80d,250d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 100d,230d ,0711h
 shots2 dw 5d,0d
 dw 0,0,0
 dw 0,0,0
@@ -56,7 +56,7 @@ max_x dw 0
 min_y dw 0
 max_y dw 0 
 
-damagedwall_pos dw ?,? 
+damagedwall_pos dw ?,?,?  ; last word for power that wall hit with 
 shootspeed dw 2
 
 mes dw 'aaaaaaaaaaaaaaaaaaaaaaaaaa' ,10,13 ,'$$'
@@ -79,9 +79,8 @@ main proc far
     int 10h   
     
     
-    ;SetMap
-
-    ;CheckBulletThroughWall 
+    SetMap
+ 
     
     mov bx ,offset tank1
     mov cx ,13d
@@ -345,7 +344,15 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             
             todamge1: ; here i should change wall color 
             mov damagedwall_pos ,cx
-            mov damagedwall_pos +2  ,dx 
+            mov damagedwall_pos +2  ,dx
+            ;-----
+            push cx
+            mov cx,[bx]+4
+            shr cx,4
+            xor ch,ch 
+            mov damagedwall_pos +4  ,cx
+            pop cx
+            ;----- 
             call damagewall   
             
             pop ax
@@ -387,7 +394,15 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
 
             todamge2: ; here i should change wall color 
             mov damagedwall_pos ,cx
-            mov damagedwall_pos +2  ,dx 
+            mov damagedwall_pos +2  ,dx
+            ;-----
+            push cx
+            mov cx,[bx]+4
+            shr cx,4
+            xor ch,ch 
+            mov damagedwall_pos +4  ,cx
+            pop cx
+            ;-----  
             call damagewall   
             
             pop ax
@@ -429,7 +444,15 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
 
             todamge3: ; here i should change wall color 
             mov damagedwall_pos ,cx
-            mov damagedwall_pos +2  ,dx 
+            mov damagedwall_pos +2  ,dx
+            ;-----
+            push cx
+            mov cx,[bx]+4
+            shr cx,4
+            xor ch,ch 
+            mov damagedwall_pos +4  ,cx
+            pop cx
+            ;-----  
             call damagewall   
             
             pop ax
@@ -471,7 +494,15 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
 
             todamge4: ; here i should change wall color 
             mov damagedwall_pos ,cx
-            mov damagedwall_pos +2  ,dx 
+            mov damagedwall_pos +2  ,dx
+            ;-----
+            push cx
+            mov cx,[bx]+4
+            shr cx,4
+            xor ch,ch 
+            mov damagedwall_pos +4  ,cx
+            pop cx
+            ;----- 
             call damagewall    
             
             pop ax
@@ -579,36 +610,60 @@ moveshots proc near
             cmp al , 0d
             jnz cas_2
             mov si,[bx +2] 
-            cmp si,2
-            jb cas_2 ; over flow check
-            sub si ,shootspeed
+            ;--
+            cmp si,shootspeed
+            jb overflow1 ; over flow check
+            sub si ,shootspeed 
+            jmp nooverflow1
+            overflow1:
+            mov si,0
+            nooverflow1:
+            ;--
             mov [bx+2],si
             jmp finish2
         cas_2:
             cmp al ,1d
             jnz cas_3
             mov si,[bx] 
-            cmp si,0fffdh ; over flow check
-            ja cas_3
+            ;---
+            cmp si,0fffdh 
+            ja overflow2 ; over flow check ; it will never exceed that number before delete (casue of map borders)
             add si ,shootspeed 
+            jmp nooverflow2
+            overflow2:
+            mov si,0
+            nooverflow2:
+            ;---
             mov [bx],si
             jmp finish2
         cas_3:    
             cmp al , 2d 
             jnz cas_4
             mov si,[bx]
+            ;---
             cmp si,shootspeed
-            jb cas_4 ; over flow check
-            sub si ,shootspeed
+            jb overflow3 ; over flow check
+            sub si ,shootspeed 
+            jmp nooverflow3
+            overflow3:
+            mov si,0
+            nooverflow3:
+            ;---
             mov [bx],si 
             jmp finish2
         cas_4:    
             cmp al , 3d
             jnz finish2
             mov si,[bx +2]
-            cmp si,0fffdh ; over flow check
-            ja finish2
-            add si ,shootspeed
+            ;---
+            cmp si,0fffdh 
+            ja overflow4 ; over flow check ; it will never exceed that number before delete (casue of map borders)
+            add si ,shootspeed 
+            jmp nooverflow4
+            overflow4:
+            mov si,0
+            nooverflow4:
+            ;---
             mov [bx+2],si
         finish2:
         add bx,6d   
@@ -664,8 +719,15 @@ damagewall proc near
     mov al,0h
     jmp remove1
     damage1:
-    mov al,0eh
+    cmp damagedwall_pos+4,2
+    jz strongdamage1
+        mov al,0eh 
+        jmp remove1   
+    strongdamage1:
+    mov al,0h
     remove1:
+
+        
     
     mov si ,damagedwall_pos+ 2
     mov  damagedwall_pos+ 2,dx
@@ -701,8 +763,14 @@ damagewall proc near
     mov al,0h
     jmp remove2
     damage2:
-    mov al,0eh
-    remove2: 
+    cmp damagedwall_pos+4,2
+    jz strongdamage2
+        mov al,0eh 
+        jmp remove2   
+    strongdamage2:
+    mov al,0h
+    remove2:
+     
     
     mov si ,damagedwall_pos+ 2
     mov  damagedwall_pos+ 2,dx
@@ -739,8 +807,13 @@ damagewall proc near
     mov al,0h
     jmp remove3
     damage3:
-    mov al,0eh
-    remove3: 
+    cmp damagedwall_pos+4,2
+    jz strongdamage3
+        mov al,0eh 
+        jmp remove3   
+    strongdamage3:
+    mov al,0h
+    remove3:     
     
     mov si ,damagedwall_pos
     mov  damagedwall_pos,cx
@@ -780,8 +853,13 @@ damagewall proc near
     mov al,0h
     jmp remove4
     damage4:
-    mov al,0eh
-    remove4:  
+    cmp damagedwall_pos+4,2
+    jz strongdamage4
+        mov al,0eh 
+        jmp remove4   
+    strongdamage4:
+    mov al,0h
+    remove4:      
     
     mov si ,damagedwall_pos
     mov  damagedwall_pos,cx
