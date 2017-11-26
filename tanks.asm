@@ -3,12 +3,11 @@
 ;11 down
 ;01 right
 ;10 left  
-include test.inc
 
 include map.inc   
 include map2.inc
 include Display.inc 
-include CheckBulletThroughWall.inc
+include Drop.inc
 
 .model meduim
 .stack 64d
@@ -22,8 +21,7 @@ WelcomeMessage db 10,13,10,13,13,13
                db '***      ****  ********  ***** ********* ******** **             ** ********$' 
               
 DoYoWantToPlay db 10,13,10,13,10,13,'                         If You want to play ,, press any key$'           
-BulletCoordinates dw 00d,00d 
-AllBullets dw 0000H,0000H
+
 
 line label byte
 StartPointX dw ,?
@@ -58,6 +56,8 @@ max_y dw 0
 
 damagedwall_pos dw ?,?,?  ; last word for power that wall hit with 
 shootspeed dw 2
+GiftsX dw 20 dup(?)
+GiftsY dw 20 dup(?)
 
 mes dw 'aaaaaaaaaaaaaaaaaaaaaaaaaa' ,10,13 ,'$$'
 integar db ' '
@@ -78,8 +78,8 @@ main proc far
     mov al,12h
     int 10h   
     
-    
     SetMap
+      
  
     
     mov bx ,offset tank1
@@ -107,6 +107,7 @@ main proc far
         mov bx, offset shots1
         mov di, offset tank2
         call process_shots  ;bx on shots1(2) of attacker tank2(1) and di on victm tank
+        ;Drop GiftsX,GiftsY,tank1,tank2
     jmp l1    
     hlt
 main endp
@@ -571,15 +572,18 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
         next: 
 
         
-        ;here check shots and walls
+   
         
         add bx,6d   
         pop cx
     loop check_del_shots
     pop bx
     
-    
-    call drawshots 
+    mov cx,1
+    make_shots_stay_longer:
+     call drawshots
+    loop make_shots_stay_longer
+     
     call moveshots ;mov shots and clear old shots the from screen 
 
     popa
