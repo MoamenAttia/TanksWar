@@ -4,10 +4,10 @@
 ;01 right
 ;10 left  
 
-;include map.inc   
+include map.inc   
 ;include map2.inc
-;include Display.inc 
-;include Drop.inc
+include Display.inc 
+include Drop.inc
 
 .model meduim
 .stack 64d
@@ -32,7 +32,7 @@ linecolor   db ,?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
-tank1 dw 2d,2d,42d,2d,42d,42d,2d,42d,  12d,6d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
+tank1 dw 200d,20d,240d,20d,240d,60d,200d,60d,  12d,6d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 220d,40d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
 ;MOV AX,TANK1 + 52
 ;ABD AX,0FFF0H
 ;MOV TANK1+52,AX
@@ -50,13 +50,13 @@ dw 0,0,0
 
     
 
-colora1 db 3  
-lengtha dw 30d  
+colora1 db 4  
+lengtha dw 40d  
 lengtha1 dw ?  
 lengtha2 dw ?       
 
 user2 label byte; +48 to get center + 52 to get orientation and hp word
-tank2 dw 300d,55d,120d,210d,120d,250d,80d,250d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 100d,230d ,0711h
+tank2 dw 200d,80d,240d,80d,240d,120d,200d,120d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 200d,100d ,0711h
 
 shots2 dw 5d,0d 
 dw 0,0,0
@@ -123,7 +123,7 @@ main proc far
     mov al,12h
     int 10h   
 
-   ;SetMap
+   SetMap
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     mov bx,offset GiftsX  
     mov Si,offset GiftsY
@@ -182,23 +182,14 @@ main proc far
     mov [si+34],325d
     mov [si+36],320d
     mov [si+38],11b 
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
+        
+     
     
     mov ax,lengtha   
     mov lengthb,ax
     
-
-    tankswar: 
-        call input_and_flowcontrol  
-    jmp tankswar    
-    hlt
-main endp
-
-input_and_flowcontrol proc near 
-    pusha 
-    
-   ; Drop GiftsX,GiftsY,tank1,tank2     
     
     ;\\\\\\\\\\\\\\\\\\\\
     call tanka
@@ -214,31 +205,51 @@ input_and_flowcontrol proc near
     call tanka
     call draw_tank
     call tankb
-    call draw_tank 
+    call draw_tank  
+    
+
+    tankswar: 
+        call input_and_flowcontrol  
+    jmp tankswar    
+    hlt
+main endp
+
+input_and_flowcontrol proc near 
+    pusha 
+    Drop GiftsX,GiftsY,tank1,tank2 
+    ;------------
+    mov bx, offset shots1
+    mov di, offset tank2
+    call process_shots
+    
+    mov bx, offset shots2
+    mov di, offset tank1    
+    call process_shots
+    ;------------  
     
     mov ah,1d
     int 16h 
-    jnz con
-    popa
-    ret  
+    jnz con 
+    jmp already_comsumed 
     con:
     cmp ah,1ch
     jnz noshoot_user1
         mov bx, offset shots1
-        mov di, offset tank2
+        mov di, offset tank1
         call inputshots
-        call process_shots
         jmp already_comsumed    
     noshoot_user1: 
     
     cmp ah,57d  
     jnz noshoot_user2
         mov bx, offset shots2
-        mov di, offset tank1
+        mov di, offset tank2
         call inputshots
-        call process_shots
         jmp already_comsumed   
-    noshoot_user2: 
+    noshoot_user2:
+    
+        
+ 
                    
     cmp ah,4Dh
     jz moveuser1 
@@ -287,10 +298,13 @@ input_and_flowcontrol proc near
     
     mov ah,0h
     int 16h
-    already_comsumed:
- 
+    already_comsumed: 
     
-    
+    mov bx, offset shots1+4
+    call moveshots ;mov shots and clear old shots the from screen 
+    mov bx, offset shots2+4    
+    call moveshots ;mov shots and clear old shots the from screen
+     
     popa
     ret
 input_and_flowcontrol endp
@@ -357,19 +371,20 @@ inputshots proc near
 ;    popa
 ;    ret
 ;    con2:
-;    
-;        mov si ,[bx]
-;        mov ax ,[bx]+2
-;        cmp si ,ax
-;    jnz con3
-;    mov ah,0
-;    int 16h   
-;    popa
-;    ret
-;    con3:
+;         
+
+    mov si ,[bx]
+    mov ax ,[bx]+2
+    cmp si ,ax
+    jnz con3
+    mov ah,0
+    int 16h   
+    popa
+    ret
+    con3:
+    
     mov ah,0
     int 16h
-     
     ;-----------
     mov ax,[bx]+2
     mov cl,6 
@@ -721,10 +736,13 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
         mov ax,[di]+52d 
         mov dx,[bx]+4d
         shr dl,4
-        sub ah,dl
-        ja noneg
-            mov ah,0 
+        cmp ah,dl
+        jb noneg
+            sub ah,dl
+			jmp else
         noneg:
+		mov ah,0
+		else:
         mov [di]+52,ax
     
         pop ax ; now orginal cx in ax ; i wonot use just to get original bx
@@ -763,13 +781,12 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
         pop cx
     loop check_del_shots
     pop bx
-    
-    mov cx,50
+      
+    mov cx,100
     make_shots_stay_longer:
      call drawshots
     loop make_shots_stay_longer
      
-    call moveshots ;mov shots and clear old shots the from screen 
 
     popa
     ret
@@ -1357,7 +1374,8 @@ draw_vertical_line proc
     push cx
     mov cx,si ;Column
     mov dx,di ;Row
-    mov ah,0ch ;Draw Pixel Command
+    mov ah,0ch ;Draw Pixel Command 
+    mov bh,0
     int 10h       
     inc di
     pop cx
@@ -1373,6 +1391,7 @@ draw_horizontal_line proc
     mov cx,si ;Column
     mov dx,di ;Row
     mov ah,0ch ;Draw Pixel Command
+    mov bh,0
     int 10h       
     inc si
     pop cx

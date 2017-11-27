@@ -270,6 +270,4 @@ call DrawLine
 ;mov EndPointY,240d
 ;mov linecolor,0
 ;call DrawLine
-
-
 ENDM SetMap

@@ -12,38 +12,38 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
    mov Si,offset GiftsY
 
   
-   mov [bx+6],11b
-
-
-  
-   mov [bx+14],11b
-
-   
-   mov [bx+22],11b
-
- 
-   mov [bx+30],11b
-
-  
-   mov [bx+38],11b
-
-
-   
-
-   mov [si+6],11b
-   
-
-   mov [si+14],11b
-
-
-  
-   mov [si+22],11b
-
-  
-   mov [si+30],11b
-
-   
-   mov [si+38],11b
+;   mov [bx+6],11b
+;
+;
+;  
+;   mov [bx+14],11b
+;
+;   
+;   mov [bx+22],11b
+;
+; 
+;   mov [bx+30],11b
+;
+;  
+;   mov [bx+38],11b
+;
+;
+;   
+;
+;   mov [si+6],11b
+;   
+;
+;   mov [si+14],11b
+;
+;
+;  
+;   mov [si+22],11b
+;
+;  
+;   mov [si+30],11b
+;
+;   
+;   mov [si+38],11b
 
 
 
