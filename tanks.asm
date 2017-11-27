@@ -4,10 +4,10 @@
 ;01 right
 ;10 left  
 
-include map.inc   
-include map2.inc
-include Display.inc 
-include Drop.inc
+;include map.inc   
+;include map2.inc
+;include Display.inc 
+;include Drop.inc
 
 .model meduim
 .stack 64d
@@ -32,22 +32,50 @@ linecolor   db ,?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
-tank1 dw 30d,110d,70d,110d,70d,150d,30d,150d,  40d,120d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
+tank1 dw 2d,2d,42d,2d,42d,42d,2d,42d,  12d,6d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 50d,130d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
+;MOV AX,TANK1 + 52
+;ABD AX,0FFF0H
+;MOV TANK1+52,AX
 shots1 dw 5d,0d
 dw 0,0,0
 dw 0,0,0
 dw 0,0,0
 dw 0,0,0
-dw 0,0,0
+dw 0,0,0  
+;equ user1_right  
+;equ user1_left
+;equ user1_up 
+;equ user1_down
+;equ user1_shoot 57d
+
+    
+
+colora1 db 3  
+lengtha dw 30d  
+lengtha1 dw ?  
+lengtha2 dw ?       
 
 user2 label byte; +48 to get center + 52 to get orientation and hp word
-tank2 dw 80d,210d,120d,210d,120d,250d,80d,250d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 100d,230d ,0711h
-shots2 dw 5d,0d
+tank2 dw 300d,55d,120d,210d,120d,250d,80d,250d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 100d,230d ,0711h
+
+shots2 dw 5d,0d 
 dw 0,0,0
 dw 0,0,0
 dw 0,0,0
 dw 0,0,0
-dw 0,0,0
+dw 0,0,0 
+;equ user2_right  
+;equ user2_left
+;equ user2_up 
+;equ user2_down
+;equ user2_shoot
+    
+
+
+colorb1 db 9   
+lengthb dw ?  
+lengthb1 dw ?   
+lengthb2 dw ?       
 
 min_x dw 0
 max_x dw 0
@@ -59,58 +87,215 @@ shootspeed dw 2
 GiftsX dw 20 dup(?)
 GiftsY dw 20 dup(?)
 
-mes dw 'aaaaaaaaaaaaaaaaaaaaaaaaaa' ,10,13 ,'$$'
-integar db ' '
+mes dw 'aaaaaaaaaaaaaaaaaaaaaaaaaa' ,10,13 ,'$$'   
+
+integar db ' '     
+length dw ?    
+startr dw ?
+startc dw ? 
+
+length1 dw ?      
+startr1 dw ?
+startc1 dw ? 
+
+length2 dw ?      
+startr2 dw ?
+startc2 dw ? 
+
+
+
+color1 dB ?
+;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  
+step dw 5
+coll_detect dw 0
+back_color db 0      
+temp_var dw 0
 
 .code 
 main proc far 
     mov AX,@Data
     mov DS,AX
-    mov es,ax    
-    
+    mov es,ax     
     ;Display  WelcomeMessage
     ;Display  DoYoWantToPlay
-    
-    ;mov ah,0
-    ;int 16h
     mov bh,0
     mov ah,0
     mov al,12h
     int 10h   
-    
-    SetMap
-      
- 
-    
-    mov bx ,offset tank1
-    mov cx ,13d
-    loop1:
-        mov al ,1d
-        call drawpx
-        add bx,4d
-    loop loop1
-        mov bx ,offset tank2
-        mov cx ,13d
-    loop2:
-        mov al ,2d
-        call drawpx
-        add bx,4d
-    loop loop2
 
-    l1:
+   ;SetMap
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    mov bx,offset GiftsX  
+    mov Si,offset GiftsY
+    
+    mov [bx],75d
+    mov [bx+2],85d
+    mov [bx+4],80d
+    mov [bx+6],11b
+    
+    
+    mov [bx+8],555d
+    mov [bx+10],565d
+    mov [bx+12],560d
+    mov [bx+14],11b
+    
+    mov [bx+16],315d
+    mov [bx+18],325d
+    mov [bx+20],320d
+    mov [bx+22],11b
+    
+    mov [bx+24],315d
+    mov [bx+26],325d
+    mov [bx+28],320d
+    mov [bx+30],11b
+    
+    mov [bx+32],315d
+    mov [bx+34],325d
+    mov [bx+36],320d
+    mov [bx+38],11b
+    
+    
+    
+    mov [si],215d
+    mov [si+2],225d
+    mov [si+4],220d
+    mov [si+6],11b
+    
+    
+    mov [si+8],215d
+    mov [si+10],225d
+    mov [si+12],220d
+    mov [si+14],11b
+    
+    
+    mov [si+16],215d
+    mov [si+18],225d
+    mov [si+20],220d
+    mov [si+22],11b
+    
+    mov [si+24],115d
+    mov [si+26],125d
+    mov [si+28],120d
+    mov [si+30],11b
+    
+    mov [si+32],315d
+    mov [si+34],325d
+    mov [si+36],320d
+    mov [si+38],11b 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    
+    
+    mov ax,lengtha   
+    mov lengthb,ax
+    
 
-        ;---------------------------------
-        mov bx,offset shots1 ;bx on shots1(2) di for tank1(2)
-        mov di,offset tank1
-        call inputshots
-        ;---------------------------------
-        mov bx, offset shots1
-        mov di, offset tank2
-        call process_shots  ;bx on shots1(2) of attacker tank2(1) and di on victm tank
-        ;Drop GiftsX,GiftsY,tank1,tank2
-    jmp l1    
+    tankswar: 
+        call input_and_flowcontrol  
+    jmp tankswar    
     hlt
 main endp
+
+input_and_flowcontrol proc near 
+    pusha 
+    
+   ; Drop GiftsX,GiftsY,tank1,tank2     
+    
+    ;\\\\\\\\\\\\\\\\\\\\
+    call tanka
+    call calc_length
+    call calc_points_down
+    call calc_tank1  
+    ;\\\\\\\\\\\\\\\\\\\\\\   
+    call tankb
+    call calc_length
+    call calc_points_up
+    call calc_tank2
+    ;///////////////////////////////////////////////////////////////////////////////////////////////////////   
+    call tanka
+    call draw_tank
+    call tankb
+    call draw_tank 
+    
+    mov ah,1d
+    int 16h 
+    jnz con
+    popa
+    ret  
+    con:
+    cmp ah,1ch
+    jnz noshoot_user1
+        mov bx, offset shots1
+        mov di, offset tank2
+        call inputshots
+        call process_shots
+        jmp already_comsumed    
+    noshoot_user1: 
+    
+    cmp ah,57d  
+    jnz noshoot_user2
+        mov bx, offset shots2
+        mov di, offset tank1
+        call inputshots
+        call process_shots
+        jmp already_comsumed   
+    noshoot_user2: 
+                   
+    cmp ah,4Dh
+    jz moveuser1 
+    
+    cmp ah,48h
+    jz moveuser1 
+    
+    cmp ah,50h
+    jz moveuser1
+    
+    cmp ah,4Bh
+    jz moveuser1
+                
+    jmp no_move_user1    
+    moveuser1:   
+     call tank_control
+     jmp already_comsumed        
+    no_move_user1:  
+                        
+                       
+                        
+    cmp ah,11h
+    jz moveuser2 
+    
+    cmp ah,1fh
+    jz moveuser2 
+    
+    cmp ah,20h
+    jz moveuser2
+    
+    cmp ah,1Eh
+    jz moveuser2
+                
+    jmp no_move_user2    
+    moveuser2:   
+     call tank_control 
+     jmp already_comsumed
+            
+    no_move_user2:  
+    
+    
+    cmp ah,01h
+    jnz donot_end
+    hlt
+    donot_end:
+    
+    mov ah,0h
+    int 16h
+    already_comsumed:
+ 
+    
+    
+    popa
+    ret
+input_and_flowcontrol endp
+
+
 
 DrawLine proc near
     pusha
@@ -161,27 +346,27 @@ drawpx endp
 inputshots proc near
     pusha 
     ;i here interset in shoot only  
-    mov ah,1d
-    int 16h 
-    jnz con
-    popa
-    ret
-    con: 
-    cmp ah,57d     
-    jz con2
-    popa
-    ret
-    con2:
-    
-        mov si ,[bx]
-        mov ax ,[bx]+2
-        cmp si ,ax
-    jnz con3
-    mov ah,0
-    int 16h   
-    popa
-    ret
-    con3:
+;    mov ah,1d
+;    int 16h 
+;    jnz con
+;    popa
+;    ret
+;    con: 
+;    cmp ah,57d     
+;    jz con2
+;    popa
+;    ret
+;    con2:
+;    
+;        mov si ,[bx]
+;        mov ax ,[bx]+2
+;        cmp si ,ax
+;    jnz con3
+;    mov ah,0
+;    int 16h   
+;    popa
+;    ret
+;    con3:
     mov ah,0
     int 16h
      
@@ -579,7 +764,7 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
     loop check_del_shots
     pop bx
     
-    mov cx,1
+    mov cx,50
     make_shots_stay_longer:
      call drawshots
     loop make_shots_stay_longer
@@ -886,7 +1071,978 @@ damagewall proc near
 damagewall endp
 
 
+ calc_tank1 proc 
+    pusha           
+    
+    mov ax,length
+    mov bx,startr
+    mov cx,startc
+    mov lengtha,ax 
+    mov tank1+2,bx
+    mov tank1,cx
+    
+    mov ax,length1
+    mov bx,startr1
+    mov cx,startc1
+    mov lengtha1,ax 
+    mov tank1+18,bx
+    mov tank1+16,cx
+    
+    mov ax,length2
+    mov bx,startr2
+    mov cx,startc2
+    mov lengtha2,ax 
+    mov tank1+34,bx
+    mov tank1+32,cx
+    mov ax,length
+    mov dl,2
+    div dl    
+    mov dx,tank1
+    add dx,ax
+    mov tank1+48,dx
+    mov dx,tank1+2
+    add dx,ax 
+    mov tank1+50,dx
+    popa
+    ret
+calc_tank1 endp
 
+calc_tank2 proc 
+    pusha 
+       
+    mov ax,length
+    mov bx,startr
+    mov cx,startc
+    mov lengthb,ax 
+    mov tank2+2,bx
+    mov tank2,cx
+    
+    mov ax,length1
+    mov bx,startr1
+    mov cx,startc1
+    mov lengthb1,ax 
+    mov tank2+18,bx
+    mov tank2+16,cx
+    
+    mov ax,length2
+    mov bx,startr2
+    mov cx,startc2
+    mov lengthb2,ax 
+    mov tank2+34,bx
+    mov tank2+32,cx
+    mov ax,length
+    mov dl,2
+    div dl    
+    mov dx,tank2
+    add dx,ax
+    mov tank2+48,dx
+    mov dx,tank2+2
+    add dx,ax
+    mov tank2+50,dx
+    popa
+    ret
+calc_tank2 endp    
+
+calc_length    proc 
+    pusha 
+    mov ax,length
+    mov dl,2
+    div dl 
+    mov ah,00
+    mov length1,ax
+    
+    
+    mov ax,length1
+    mov dl,3
+    div dl   
+    mov ah,00
+    mov length2,ax 
+    popa   
+    ret
+calc_length endp  
+
+
+calc_points_up proc 
+    pusha 
+    mov bx,length
+    add bx,startr
+    mov ax,length
+    sub ax,length1
+    mov dl,3
+    div dl
+    mov ah,00 
+    sub bx,ax  
+    sub bx,length1
+    mov startr1,bx  
+    
+  
+    
+    mov bx,length
+    add bx,startc
+    mov ax,length
+    sub ax,length1
+    mov dl,2
+    div dl  
+    mov ah,00
+    sub bx,ax
+    sub bx,length1 
+    mov startc1,bx   
+    
+    mov bx,length1
+    add bx,startc1
+    mov ax,length1
+    sub ax,length2
+    mov dl,2
+    div dl  
+    mov ah,00
+    sub bx,ax
+    sub bx,length2 
+    mov startc2,bx
+                    
+                    
+    mov bx,startr1
+    sub bx,length2
+    mov startr2,bx 
+    popa  
+    ret
+calc_points_up endp   
+    
+
+calc_points_down proc
+    pusha  
+    mov bx,length
+    add bx,startr
+    mov ax,length
+    sub ax,length1
+    mov dl,3
+    div dl 
+    mov ah,00 
+    mov dl,2
+    mul dl  
+    mov ah,00 
+    sub bx,ax  
+    sub bx,length1
+    mov startr1,bx  
+    
+  
+    mov bx,length
+    add bx,startc
+    mov ax,length
+    sub ax,length1
+    mov dl,2
+    div dl  
+    mov ah,00
+    sub bx,ax
+    sub bx,length1 
+    mov startc1,bx   
+    
+    
+    mov bx,length1
+    add bx,startc1
+    mov ax,length1
+    sub ax,length2
+    mov dl,2
+    div dl  
+    mov ah,00
+    sub bx,ax
+    sub bx,length2 
+    mov startc2,bx
+                    
+                    
+    mov bx,startr1
+    add bx,length1
+    mov startr2,bx  
+    popa 
+    ret
+calc_points_down endp   
+        
+
+
+calc_points_right proc
+    pusha  
+    mov bx,length
+    add bx,startc
+    mov ax,length
+    sub ax,length1
+    mov dl,3
+    div dl 
+    mov ah,00 
+    mov dl,2
+    mul dl  
+    mov ah,00 
+    sub bx,ax  
+    sub bx,length1
+    mov startc1,bx  
+    
+  
+    
+    mov bx,length
+    add bx,startr
+    mov ax,length
+    sub ax,length1
+    mov dl,2
+    div dl  
+    mov ah,00
+    sub bx,ax
+    sub bx,length1 
+    mov startr1,bx   
+    
+    mov bx,length1
+    add bx,startr1
+    mov ax,length1
+    sub ax,length2
+    mov dl,2
+    div dl  
+    mov ah,00
+    sub bx,ax
+    sub bx,length2 
+    mov startr2,bx
+                    
+                    
+    mov bx,startc1
+    add bx,length1
+    mov startc2,bx 
+    popa  
+    ret
+calc_points_right endp
+
+calc_points_left proc
+    pusha  
+    mov bx,length
+    add bx,startc
+    mov ax,length
+    sub ax,length1
+    mov dl,3
+    div dl
+    mov ah,00 
+    sub bx,ax  
+    sub bx,length1
+    mov startc1,bx  
+    
+  
+    
+    mov bx,length
+    add bx,startr
+    mov ax,length
+    sub ax,length1
+    mov dl,2
+    div dl  
+    mov ah,00
+    sub bx,ax
+    sub bx,length1 
+    mov startr1,bx   
+    
+    mov bx,length1
+    add bx,startr1
+    mov ax,length1
+    sub ax,length2
+    mov dl,2
+    div dl  
+    mov ah,00
+    sub bx,ax
+    sub bx,length2 
+    mov startr2,bx
+                    
+                    
+    mov bx,startc1
+    sub bx,length2
+    mov startc2,bx 
+    popa  
+    ret
+calc_points_left endp 
+
+draw_vertical_line proc
+    pusha        
+    loopa:
+    push cx
+    mov cx,si ;Column
+    mov dx,di ;Row
+    mov ah,0ch ;Draw Pixel Command
+    int 10h       
+    inc di
+    pop cx
+    loop loopa
+    popa  
+    ret
+draw_vertical_line endp
+
+draw_horizontal_line proc        
+    pusha
+    loopb:
+    push cx
+    mov cx,si ;Column
+    mov dx,di ;Row
+    mov ah,0ch ;Draw Pixel Command
+    int 10h       
+    inc si
+    pop cx
+    loop loopb
+    popa   
+    ret
+draw_horizontal_line endp
+
+tanka proc 
+    pusha
+    mov ax,lengtha
+    mov bx,tank1+2
+    mov cx,tank1
+    mov length,ax 
+    mov startr,bx
+    mov startc,cx
+    
+    mov ax,lengtha1
+    mov bx,tank1+18
+    mov cx,tank1+16
+    mov length1,ax 
+    mov startr1,bx
+    mov startc1,cx
+    
+    mov ax,lengtha2
+    mov bx,tank1+34
+    mov cx,tank1+32
+    mov length2,ax 
+    mov startr2,bx
+    mov startc2,cx
+    
+    mov bl,colora1
+    mov color1,bl
+    popa  
+    ret
+tanka endp         
+
+tankb proc  
+    pusha
+    mov ax,lengthb
+    mov bx,tank2+2
+    mov cx,tank2
+    mov length,ax 
+    mov startr,bx
+    mov startc,cx
+    
+    mov ax,lengthb1
+    mov bx,tank2+18
+    mov cx,tank2+16
+    mov length1,ax 
+    mov startr1,bx
+    mov startc1,cx
+    
+    mov ax,lengthb2
+    mov bx,tank2+34
+    mov cx,tank2+32
+    mov length2,ax 
+    mov startr2,bx
+    mov startc2,cx
+    
+    mov bl,colorb1
+    mov color1,bl
+    popa  
+    ret
+tankb endp
+
+draw_tank proc 
+    pusha 
+    mov cx,length    
+    mov si,startc
+    mov di,startr   
+    mov al,color1 ;Pixel color
+    call draw_vertical_line 
+   
+   
+    mov cx,length   
+    mov si,startc
+    mov di,startr
+    mov al,color1 ;Pixel color
+    call draw_horizontal_line 
+    
+    
+    
+    mov cx,length     
+    mov bx,startr
+    add bx,length 
+    mov si,startc
+    mov di,bx
+    mov al,color1 ;Pixel color
+    call draw_horizontal_line 
+  
+    
+    
+    
+    mov cx,length
+    add cx,1     
+    mov bx,startc
+    add bx,length 
+    mov si,bx
+    mov di,startr
+    mov al,color1 ;Pixel color
+    call draw_vertical_line 
+
+
+
+
+
+
+
+    mov cx,length1    
+    mov si,startc1
+    mov di,startr1   
+    mov al,color1 ;Pixel color
+    call draw_vertical_line 
+    
+    
+    mov cx,length1    
+    mov si,startc1
+    mov di,startr1
+    mov al,color1 ;Pixel color
+    call draw_horizontal_line 
+    
+    
+    mov cx,length1     
+    mov bx,startr1
+    add bx,length1 
+    mov si,startc1
+    mov di,bx
+    mov al,color1 ;Pixel color
+    call draw_horizontal_line 
+    
+    
+    
+    mov cx,length1 
+    add cx,1    
+    mov bx,startc1
+    add bx,length1 
+    mov si,bx
+    mov di,startr1
+    mov al,color1 ;Pixel color
+    call draw_vertical_line 
+    
+    
+    
+    
+    
+    mov cx,length2    
+    mov si,startc2
+    mov di,startr2   
+    mov al,color1 ;Pixel color
+    call draw_vertical_line 
+    
+    
+    mov cx,length2    
+    mov si,startc2
+    mov di,startr2
+    mov al,color1 ;Pixel color
+    call draw_horizontal_line 
+    
+    
+    mov cx,length2     
+    mov bx,startr2
+    add bx,length2 
+    mov si,startc2
+    mov di,bx
+    mov al,color1 ;Pixel color
+    call draw_horizontal_line 
+    
+    
+    
+    mov cx,length2 
+    add cx,1      
+    mov bx,startc2
+    add bx,length2 
+    mov si,bx
+    mov di,startr2
+    mov al,color1 ;Pixel color
+    call draw_vertical_line   
+    
+   
+    
+    popa    
+    ret 
+draw_tank endp 
+
+clear_tank proc
+    pusha 
+    mov color1,0
+    call draw_tank     
+    popa 
+    ret
+clear_tank endp 
+
+                       
+             
+
+check_up proc 
+    pusha  
+    inc step
+    mov ax,step
+    mov temp_var,ax 
+    mov di,startc
+    loopout1:  
+    mov si,startr
+    push temp_var
+    mov ax,step
+    mov temp_var,ax
+    loopin1:
+    mov ah,0Dh
+    mov bh,00
+    mov cx,di
+    mov dx,si
+    int 10h
+    cmp al,back_color
+    jnz collup
+    inc si
+    dec temp_var
+    jnz loopin1
+    pop temp_var
+    inc di
+    dec temp_var
+    jnz loopout1     
+    dec step
+    mov coll_detect,0   
+    popa
+    ret
+    collup: 
+    pop temp_var
+    dec step    
+    mov coll_detect,1 
+    popa      
+ret
+check_up endp                 
+
+
+check_down proc 
+    pusha  
+    inc step
+    mov ax,step
+    mov temp_var,ax 
+    mov di,startc
+    loopout2:  
+    mov si,startr
+    add si,length
+    push temp_var
+    mov ax,step
+    mov temp_var,ax
+    loopin2:
+    mov ah,0Dh
+    mov bh,00
+    mov cx,di
+    mov dx,si
+    int 10h
+    cmp al,back_color
+    jnz colldown
+    dec si
+    dec temp_var
+    jnz loopin2
+    pop temp_var
+    inc di
+    dec temp_var
+    jnz loopout2     
+    dec step
+    mov coll_detect,0   
+    popa
+    ret
+    colldown: 
+    pop temp_var
+    dec step    
+    mov coll_detect,1 
+    popa      
+ret
+check_down endp 
+
+
+
+check_right proc 
+    pusha  
+    inc step
+    mov ax,step
+    mov temp_var,ax 
+    mov si,startr    
+    loopout3:  
+    mov di,startc
+    add di,length
+    push temp_var
+    mov ax,step
+    mov temp_var,ax
+    loopin3:
+    mov ah,0Dh
+    mov bh,00
+    mov cx,di
+    mov dx,si
+    int 10h
+    cmp al,back_color
+    jnz collright
+    dec di
+    dec temp_var
+    jnz loopin3
+    pop temp_var
+    inc si
+    dec temp_var
+    jnz loopout3     
+    dec step
+    mov coll_detect,0   
+    popa
+    ret
+    collright: 
+    pop temp_var
+    dec step    
+    mov coll_detect,1 
+    popa      
+ret
+check_right endp      
+
+
+check_left proc 
+    pusha  
+    inc step
+    mov ax,step
+    mov temp_var,ax 
+    mov si,startr
+    loopout4:  
+    mov di,startc
+    push temp_var
+    mov ax,step
+    mov temp_var,ax
+    loopin4:
+    mov ah,0Dh
+    mov bh,00
+    mov cx,di
+    mov dx,si
+    int 10h
+    cmp al,back_color
+    jnz collleft
+    inc di
+    dec temp_var
+    jnz loopin4
+    pop temp_var
+    inc si
+    dec temp_var
+    jnz loopout4     
+    dec step
+    mov coll_detect,0   
+    popa
+    ret
+    collleft: 
+    pop temp_var
+    dec step    
+    mov coll_detect,1 
+    popa      
+    ret
+check_left endp
+
+move_up1 proc  
+    pusha
+    call tanka
+    call clear_tank 
+    call tankb
+    call draw_tank  
+    mov ax,step
+    sub tank1+2,ax 
+    call tanka   
+    call check_up 
+    cmp coll_detect,1
+    jz col1
+    jmp conti1
+    col1:
+    mov ax,step 
+    add tank1+2,ax
+    conti1: 
+    mov coll_detect,0
+    call tanka 
+    call calc_points_up
+    call calc_tank1    
+    call draw_tank 
+    popa
+    ret    
+move_up1 endp 
+
+move_down1 proc
+    pusha 
+    call tanka
+    call clear_tank 
+    call tankb
+    call draw_tank 
+    mov ax,step  
+    call tanka 
+    add tank1+2,ax 
+    call check_down  
+    cmp coll_detect,1
+    jz col2
+    jmp conti2
+    col2:
+    mov ax,step 
+    sub tank1+2,ax
+    conti2:   
+    mov coll_detect,0
+    call tanka 
+    call calc_points_down
+    call calc_tank1     
+    call draw_tank
+    popa
+    ret    
+move_down1 endp
+
+move_right1 proc 
+    pusha   
+    call tanka
+    call clear_tank
+    call tankb
+    call draw_tank
+    mov ax,step 
+    add tank1,ax   
+    call tanka 
+    call check_right 
+    cmp coll_detect,1
+    jz col3
+    jmp conti3
+    col3:
+    mov ax,step 
+    sub tank1,ax
+    conti3:         
+    mov coll_detect,0
+    call tanka  
+    call calc_points_right
+    call calc_tank1
+    call draw_tank  
+    popa
+    ret    
+move_right1 endp
+
+move_left1 proc
+    pusha     
+    call tanka
+    call clear_tank 
+    call tankb
+    call draw_tank
+    mov ax,step
+    sub tank1,ax    
+    call tanka 
+    call check_left  
+    cmp coll_detect,1
+    jz col4
+    jmp conti4
+    col4:
+    mov ax,step 
+    add tank1,ax
+    conti4:           
+    mov coll_detect,0
+    call tanka 
+    call calc_points_left
+    call calc_tank1   
+    call draw_tank   
+    popa
+    ret    
+move_left1 endp
+
+move_up2 proc
+    pusha
+    call tankb
+    call clear_tank 
+    call tanka
+    call draw_tank
+    mov ax,step 
+    sub tank2+2,ax
+    call tankb
+    call check_up
+    cmp coll_detect,1
+    jz col5
+    jmp conti5
+    col5:
+    mov ax,step 
+    add tank2+2,ax
+    conti5: 
+    mov coll_detect,0
+    call tankb 
+    call calc_points_up
+    call calc_tank2
+    call draw_tank 
+    popa
+    ret    
+move_up2 endp 
+
+move_down2 proc
+    pusha
+    call tankb
+    call clear_tank
+    call tanka
+    call draw_tank  
+    mov ax,step 
+    add tank2+2,ax 
+    call tankb 
+    call check_down  
+    cmp coll_detect,1
+    jz col6
+    jmp conti6
+    col6:
+    mov ax,step 
+    sub tank2+2,ax
+    conti6:   
+    mov coll_detect,0
+    call tankb   
+    call calc_points_down
+    call calc_tank2 
+    call draw_tank
+    popa        
+    ret    
+move_down2 endp
+
+move_right2 proc
+    pusha
+    call tankb
+    call clear_tank
+    call tanka
+    call draw_tank
+    mov ax,step   
+    add tank2,ax   
+    call tankb
+    call check_right 
+    cmp coll_detect,1
+    jz col7
+    jmp conti7
+    col7:
+    mov ax,step 
+    sub tank2,ax
+    conti7:   
+    mov coll_detect,0
+    call tankb 
+    call calc_points_right
+    call calc_tank2
+    call draw_tank
+    popa
+    ret    
+move_right2 endp
+
+move_left2 proc
+    pusha 
+    call tankb
+    call clear_tank 
+    call tanka
+    call draw_tank
+    mov ax,step 
+    sub tank2,ax  
+    call tankb
+    call check_left 
+    cmp coll_detect,1
+    jz col8
+    jmp conti8
+    col8:
+    mov ax,step 
+    add tank2,ax
+    conti8:   
+    mov coll_detect,0
+    call tankb
+    call calc_points_left
+    call calc_tank2 
+    call draw_tank 
+    popa
+    ret    
+move_left2 endp    
+
+;check_tank_collision proc 
+;    mov ax,tank1
+;    mov bx,tank2
+;    mov dx,tank2
+;    add dx,lengthb
+;    mov cx,lengtha
+;    hor_loop:    
+;    cmp ax,bx
+;    jae p1
+;    jmp cont1
+;    p1:
+;    cmp ax,dx
+;    jbe ver
+;    cont1:
+;    inc ax
+;    loop hor_loop
+;    ret
+;    ver:     
+;    mov ax,tank1+2
+;    mov bx,tank2+2
+;    mov dx,tank2+2
+;    add dx,lengthb  
+;    mov cx,lengtha
+;    ver_loop:  
+;    cmp ax,bx
+;    jae p2
+;    jmp cont1a
+;    p2:
+;    cmp ax,dx
+;    jbe coll
+;    cont1a:
+;    inc ax
+;    loop ver_loop 
+;    mov ax,0
+;    ret
+;    coll:
+;    mov ax,coll_detect
+;    ret
+; 
+;check_tank_collision endp
+;                          
+             
+                          
+
+    
+                                               
+
+
+tank_control proc
+    pusha      
+ 
+    mov ah,0
+    int 16h
+    cmp ah,48h
+    jz up1  
+    cmp ah,50h
+    jz down1
+    cmp ah,4Dh
+    jz right1
+    cmp ah,4Bh
+    jz left1
+      
+    
+    cmp ah,11h
+    jz up2  
+    cmp ah,1fh
+    jz down2
+    cmp ah,20h
+    jz right2
+    cmp ah,1Eh
+    jz left2  
+    
+    up1:
+    call move_up1
+    jmp walk      
+    
+    down1:
+    call move_down1
+    jmp walk
+    
+    right1:
+    call move_right1
+    jmp walk
+    
+    left1:
+    call move_left1
+    jmp walk      
+    
+    up2:
+    call move_up2
+    jmp walk      
+    
+    down2:
+    call move_down2
+    jmp walk
+    
+    right2:
+    call move_right2
+    jmp walk
+    
+    left2:
+    call move_left2
+    jmp walk
+        
+    walk:
+    popa
+    ret
+tank_control endp
 end main
                                  
                                  

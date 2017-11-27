@@ -11,59 +11,38 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
    mov bx,offset GiftsX  
    mov Si,offset GiftsY
 
-   mov [bx],60d
-   mov [bx+2],100d
-   mov [bx+4],80d
+  
    mov [bx+6],11b
 
 
-   mov [bx+8],540d
-   mov [bx+10],580d
-   mov [bx+12],560d
+  
    mov [bx+14],11b
 
-   mov [bx+16],300d
-   mov [bx+18],340d
-   mov [bx+20],320d
+   
    mov [bx+22],11b
 
-   mov [bx+24],300d
-   mov [bx+26],340d
-   mov [bx+28],320d
+ 
    mov [bx+30],11b
 
-   mov [bx+32],300d
-   mov [bx+34],340d
-   mov [bx+36],320d
+  
    mov [bx+38],11b
 
 
    
-   mov [si],200d
-   mov [si+2],240d
-   mov [si+4],220d
+
    mov [si+6],11b
    
 
-   mov [si+8],200d
-   mov [si+10],240d
-   mov [si+12],220d
    mov [si+14],11b
 
 
-   mov [si+16],200d
-   mov [si+18],240d
-   mov [si+20],220d
+  
    mov [si+22],11b
 
-   mov [si+24],100d
-   mov [si+26],140d
-   mov [si+28],120d
+  
    mov [si+30],11b
 
-   mov [si+32],300d
-   mov [si+34],340d
-   mov [si+36],320d
+   
    mov [si+38],11b
 
 
@@ -148,7 +127,7 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
 	label:
 	cmp dx,[si+2]
 	je label2
-	sub cx,40d
+	sub cx,10d
 	inc dx    
 	
 	jmp innerloop

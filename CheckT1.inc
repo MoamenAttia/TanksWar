@@ -16,7 +16,7 @@ local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,boost_
 	mov ax,00
 	mov ax,[bx+4]
 	sub ax,[di+48]
-	cmp ax,40d
+	cmp ax,25d
 	jb label3
 	jmp label4
 	label3:
@@ -25,7 +25,7 @@ local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,boost_
 	add ax,00
 	mov ax,[di+48]
 	sub ax,[bx+4]
-	cmp ax,40d
+	cmp ax,25d
 	jb label3
 	label4:
 	add bx,08d
@@ -41,7 +41,7 @@ local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,boost_
 	add ax,00
 	mov ax,[si+4]
 	sub ax,[di+50]
-	cmp ax,40d
+	cmp ax,25d
 	jb labelc
 	jmp label4
 	labelc:
@@ -50,7 +50,7 @@ local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,boost_
 	add ax,00
 	mov ax,[di+50]
 	sub ax,[si+4]
-	cmp ax,40d
+	cmp ax,25d
 	jb labelc
 	add bx,08d
 	add si,08d
