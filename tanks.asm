@@ -7,7 +7,7 @@
 include map.inc   
 ;include map2.inc
 ;include Display.inc 
-;include Drop.inc
+include Drop.inc
 ;include test.inc
 .model meduim
 .stack 64d
@@ -216,7 +216,7 @@ main endp
 
 input_and_flowcontrol proc near 
     pusha 
-    ;Drop GiftsX,GiftsY,tank1,tank2 
+   Drop GiftsX,GiftsY,tank1,tank2 
     ;------------ 
     
     
