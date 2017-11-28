@@ -6,9 +6,9 @@
 
 include map.inc   
 ;include map2.inc
-include Display.inc 
-include Drop.inc
-
+;include Display.inc 
+;include Drop.inc
+;include test.inc
 .model meduim
 .stack 64d
 .data                        
@@ -87,7 +87,7 @@ shootspeed dw 2
 GiftsX dw 20 dup(?)
 GiftsY dw 20 dup(?)
 
-mes dw 'aaaaaaaaaaaaaaaaaaaaaaaaaa' ,10,13 ,'$$'   
+mes db '',? ,10,13 ,'$$'   
 
 integar db ' '     
 length dw ?    
@@ -216,15 +216,20 @@ main endp
 
 input_and_flowcontrol proc near 
     pusha 
-    Drop GiftsX,GiftsY,tank1,tank2 
-    ;------------
-    mov bx, offset shots1
-    mov di, offset tank2
-    call process_shots
+    ;Drop GiftsX,GiftsY,tank1,tank2 
+    ;------------ 
+    
+    
     
     mov bx, offset shots2
     mov di, offset tank1    
     call process_shots
+    
+    mov bx, offset shots1
+    mov di, offset tank2
+    call process_shots 
+    
+    
     ;------------  
     
     mov ah,1d
@@ -285,7 +290,7 @@ input_and_flowcontrol proc near
                 
     jmp no_move_user2    
     moveuser2:   
-     call tank_control 
+      call tank_control 
      jmp already_comsumed
             
     no_move_user2:  
@@ -300,9 +305,11 @@ input_and_flowcontrol proc near
     int 16h
     already_comsumed: 
     
-    mov bx, offset shots1+4
+    mov bx, offset shots1
+    add bx,4
     call moveshots ;mov shots and clear old shots the from screen 
-    mov bx, offset shots2+4    
+    mov bx, offset shots2
+    add bx,4    
     call moveshots ;mov shots and clear old shots the from screen
      
     popa
@@ -535,7 +542,7 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             jnz to1 
                 pop ax
                 pop cx 
-                jmp noneg  ;noneg name has no meaning here it will go to line when i start deleteing node (by chance :D)       
+                jmp deleteshot        
           to1:   
             cmp al,0ch    ;strong wall   
             jz todamge1
@@ -558,7 +565,7 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             
             pop ax
             pop cx
-            jmp noneg        
+            jmp deleteshot        
             to2:
             pop ax
             pop cx  
@@ -586,7 +593,7 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             jnz to11 
                 pop ax
                 pop cx 
-                jmp noneg        
+                jmp deleteshot        
           to11:
             cmp al,0ch    ;strong wall   
             jz todamge2
@@ -608,7 +615,7 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             
             pop ax
             pop cx
-            jmp noneg          
+            jmp deleteshot          
             to22:
             pop ax
             pop cx  
@@ -636,7 +643,7 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             jnz to111 
                 pop ax
                 pop cx 
-                jmp noneg        
+                jmp deleteshot        
           to111:
             cmp al,0ch    ;strong color   
             jz todamge3
@@ -658,7 +665,7 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             
             pop ax
             pop cx
-            jmp noneg         
+            jmp deleteshot         
             to222:
             pop ax
             pop cx  
@@ -686,7 +693,7 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             jnz to1111 
                 pop ax
                 pop cx 
-                jmp noneg        
+                jmp deleteshot        
           to1111:
             cmp al,0ch    ;strong wall   
             jz todamge4
@@ -706,9 +713,9 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
             ;----- 
             call damagewall    
             
-            pop ax
+            pop ax           
             pop cx
-            jmp noneg         
+            jmp deleteshot         
             to2222:
             pop ax
             pop cx     
@@ -736,14 +743,14 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
         mov ax,[di]+52d 
         mov dx,[bx]+4d
         shr dl,4
-        cmp ah,dl
-        jb noneg
-            sub ah,dl
-			jmp else
+        sub ah,dl
+        ja noneg
+            mov ah,0
         noneg:
-		mov ah,0
-		else:
-        mov [di]+52,ax
+
+        mov [di]+52,ax 
+        
+        deleteshot:
     
         pop ax ; now orginal cx in ax ; i wonot use just to get original bx
         pop si ; now original bx in si
@@ -809,7 +816,7 @@ moveshots proc near
         mov al ,00h  ;remove(from screen) shot before moving ant itwill redrawn in next iteration 
         call drawpx 
         
-        mov ax,[bx]+4
+        mov ax,[bx]+4  
         and al ,00000011b
     
         cas_1:    
