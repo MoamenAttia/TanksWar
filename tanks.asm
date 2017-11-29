@@ -74,7 +74,7 @@ min_y dw 0
 max_y dw 0 
 
 damagedwall_pos dw ?,?,?  ; last word for power that wall hit with 
-shootspeed dw 12
+shootspeed dw 10
 GiftsX dw 20 dup(?)
 GiftsY dw 20 dup(?)
 
@@ -325,11 +325,11 @@ input_and_flowcontrol proc near
     
     
     ;------------ 
-         
-    mov cx,200
-    justwait:
-    loop justwait 
-    
+     ; wait int
+     mov cx,0  
+     mov dx,8000d
+     mov ah,86h
+     int 15h       
     ;----------
     
     mov bx, offset shots1
@@ -864,13 +864,13 @@ moveshots proc near
             jnz cas_3
             mov si,[bx] 
             ;---
-            cmp si,0fffdh 
-            ja overflow2 ; over flow check ; it will never exceed that number before delete (casue of map borders)
             add si ,shootspeed 
+            jo overflow2 ; over flow check 
             jmp nooverflow2
             overflow2:
             mov si,0
             nooverflow2:
+            
             ;---
             mov [bx],si
             jmp finish2
@@ -879,9 +879,8 @@ moveshots proc near
             jnz cas_4
             mov si,[bx]
             ;---
-            cmp si,shootspeed
-            jb overflow3 ; over flow check
             sub si ,shootspeed 
+            jo overflow3 ; over flow check 
             jmp nooverflow3
             overflow3:
             mov si,0
@@ -894,9 +893,8 @@ moveshots proc near
             jnz finish2
             mov si,[bx +2]
             ;---
-            cmp si,0fffdh 
-            ja overflow4 ; over flow check ; it will never exceed that number before delete (casue of map borders)
             add si ,shootspeed 
+            jo overflow4 ; over flow check 
             jmp nooverflow4
             overflow4:
             mov si,0
