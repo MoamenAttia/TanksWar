@@ -5,7 +5,7 @@ local local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,
 	mov bx,offset GiftsX
 	mov Si,offset GiftsY
 	mov Di,offset Tank2
-	mov cx ,05d
+	mov cx ,01d
 	loop1:
 	mov dx,[di+48]
     cmp [bx+4],dx
@@ -29,7 +29,9 @@ local local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,
 	label4:
 	add bx,08d
 	add si,08d
-	loop loop1
+	inc cx
+	cmp cx,05d
+	jbe loop1
 	jmp cc
 	checkY:
 	mov dx,[di+50]
@@ -53,7 +55,9 @@ local local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,
 	jb labelc
 	add bx,08d
 	add si,08d
-	loop loop1
+	inc cx
+	cmp cx,05d
+	jbe loop1
 	apply:
 	cmp cx,1
 	je boost_HP
@@ -68,7 +72,9 @@ local local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,
 	je ForSure1
 	add bx,08d
 	add si,08d
-	loop loop1
+	inc cx
+	cmp cx,05d
+	jbe loop1
 	ForSure1:
 	mov dx,[di+52]
 	mov dh,07d
@@ -76,13 +82,17 @@ local local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,
 	and [bx+6],00b
 	add bx,08d
 	add si,08d
-	loop loop1
+	inc cx
+	cmp cx,05d
+	jbe loop1
 	boost_Power:
 	cmp [bx+6],11b
 	je ForSure2
 	add bx,08d
 	add si,08d
-	loop loop1
+	inc cx
+	cmp cx,05d
+	jbe loop1
 	ForSure2:
 	mov dx,[di+52]
 	OR  dx,0000000000100000b 
@@ -91,7 +101,9 @@ local local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,
 	and [bx+6],00b
 	add bx,08d
 	add si,08d
-	loop loop1
+	inc cx
+	cmp cx,05d
+	jbe loop1
 	cc:
 	popa
 endm Check_Passing_Through_Tank2

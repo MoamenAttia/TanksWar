@@ -5,9 +5,9 @@
 ;10 left  
 
 include map.inc   
-;include map2.inc
+include map2.inc
 ;include Display.inc 
-;include Drop.inc
+include Drop.inc
 ;include test.inc
 .model meduim
 .stack 64d
@@ -32,10 +32,7 @@ linecolor   db ,?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
-tank1 dw 200d,20d,240d,20d,240d,60d,200d,60d,  12d,6d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 220d,40d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
-;MOV AX,TANK1 + 52
-;ABD AX,0FFF0H
-;MOV TANK1+52,AX
+tank1 dw 2d,2d,42d,2d,42d,42d,2d,42d,  12d,6d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 22d,22d ,0713h ;three rectangles 2 words tankcenter  more word for hp and orientation
 shots1 dw 5d,0d
 dw 0,0,0
 dw 0,0,0
@@ -50,13 +47,13 @@ dw 0,0,0
 
     
 
-colora1 db 4  
+colora1 db 15  
 lengtha dw 40d  
 lengtha1 dw ?  
 lengtha2 dw ?       
 
 user2 label byte; +48 to get center + 52 to get orientation and hp word
-tank2 dw 200d,80d,240d,80d,240d,120d,200d,120d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 200d,100d ,0711h
+tank2 dw 598,377d,638d,377d,638d,417d,598d,417d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 618d,397d ,0710h
 
 shots2 dw 5d,0d 
 dw 0,0,0
@@ -72,7 +69,7 @@ dw 0,0,0
     
 
 
-colorb1 db 9   
+colorb1 db 13  
 lengthb dw ?  
 lengthb1 dw ?   
 lengthb2 dw ?       
@@ -108,7 +105,8 @@ color1 dB ?
 ;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  
 step dw 5
 coll_detect dw 0
-back_color db 0      
+wall_col db 0ch  
+frame_col db 03dh    
 temp_var dw 0
 
 .code 
@@ -121,12 +119,40 @@ main proc far
     mov bh,0
     mov ah,0
     mov al,12h
-    int 10h   
+    int 10h  
+    ;set all points of tanks
+    mov ax,tank1 
+    mov tank1+12,ax
+    add ax,lengtha
+    mov tank1+4,ax    
+    mov tank1+8,ax 
+    
+    mov ax,tank1+2 
+    mov tank1+6,ax
+    add ax,lengtha
+    mov tank1+10,ax    
+    mov tank1+14,ax    
+    
+    
+    mov ax,tank2 
+    mov tank2+12,ax
+    add ax,lengtha
+    mov tank2+4,ax    
+    mov tank2+8,ax 
+    
+    mov ax,tank2+2 
+    mov tank2+6,ax
+    add ax,lengtha
+    mov tank2+10,ax    
+    mov tank2+14,ax
+     
 
    SetMap
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     mov bx,offset GiftsX  
-    mov Si,offset GiftsY
+    mov Si,offset GiftsY  
+    
+    
     
     mov [bx],75d
     mov [bx+2],85d
@@ -216,7 +242,7 @@ main endp
 
 input_and_flowcontrol proc near 
     pusha 
-    ;Drop GiftsX,GiftsY,tank1,tank2 
+    Drop GiftsX,GiftsY,tank1,tank2 
     ;------------ 
     
     
@@ -1226,7 +1252,9 @@ calc_points_up proc
                     
     mov bx,startr1
     sub bx,length2
-    mov startr2,bx 
+    mov startr2,bx
+    
+     
     popa  
     ret
 calc_points_up endp   
@@ -1596,38 +1624,43 @@ clear_tank endp
              
 
 check_up proc 
-    pusha  
-    inc step
-    mov ax,step
-    mov temp_var,ax 
+    pusha     
     mov di,startc
-    loopout1:  
-    mov si,startr
-    push temp_var
+    mov ax,length  
+    mov temp_var,ax
+    inc temp_var
+    loopout1:
+    push temp_var  
+    mov si,startr  
     mov ax,step
     mov temp_var,ax
+    inc temp_var
     loopin1:
     mov ah,0Dh
     mov bh,00
     mov cx,di
     mov dx,si
     int 10h
-    cmp al,back_color
-    jnz collup
+    cmp al,wall_col
+    jz collup 
+    cmp al,frame_col
+    jz collup 
+    cmp al,colora1
+    jz collup 
+    cmp al,colorb1
+    jz collup 
     inc si
     dec temp_var
-    jnz loopin1
+    jnz loopin1  
     pop temp_var
     inc di
     dec temp_var
     jnz loopout1     
-    dec step
     mov coll_detect,0   
     popa
     ret
-    collup: 
-    pop temp_var
-    dec step    
+    collup:  
+    pop temp_var 
     mov coll_detect,1 
     popa      
 ret
@@ -1636,38 +1669,43 @@ check_up endp
 
 check_down proc 
     pusha  
-    inc step
-    mov ax,step
-    mov temp_var,ax 
     mov di,startc
-    loopout2:  
+    mov ax,length  
+    mov temp_var,ax
+    inc temp_var
+    loopout2:
+    push temp_var   
     mov si,startr
-    add si,length
-    push temp_var
+    add si,length 
     mov ax,step
     mov temp_var,ax
+    inc temp_var 
     loopin2:
     mov ah,0Dh
     mov bh,00
     mov cx,di
     mov dx,si
     int 10h
-    cmp al,back_color
-    jnz colldown
-    dec si
+    cmp al,wall_col
+    jz colldown 
+    cmp al,frame_col
+    jz colldown 
+    cmp al,colora1
+    jz colldown 
+    cmp al,colorb1
+    jz colldown 
+    dec si 
     dec temp_var
     jnz loopin2
     pop temp_var
     inc di
     dec temp_var
     jnz loopout2     
-    dec step
     mov coll_detect,0   
     popa
     ret
-    colldown: 
-    pop temp_var
-    dec step    
+    colldown:    
+    pop temp_var      
     mov coll_detect,1 
     popa      
 ret
@@ -1676,39 +1714,44 @@ check_down endp
 
 
 check_right proc 
-    pusha  
-    inc step
-    mov ax,step
-    mov temp_var,ax 
+    pusha 
     mov si,startr    
-    loopout3:  
-    mov di,startc
-    add di,length
-    push temp_var
-    mov ax,step
+    mov ax,length  
     mov temp_var,ax
+    inc temp_var
+    loopout3:
+    push temp_var    
+    mov di,startc
+    add di,length 
+    mov ax,step    
+    mov temp_var,ax
+    inc temp_var 
     loopin3:
     mov ah,0Dh
     mov bh,00
     mov cx,di
     mov dx,si
     int 10h
-    cmp al,back_color
-    jnz collright
-    dec di
+    cmp al,wall_col
+    jz collright 
+    cmp al,frame_col
+    jz collright 
+    cmp al,colora1
+    jz collright 
+    cmp al,colorb1
+    jz collright 
+    dec di   
     dec temp_var
-    jnz loopin3
+    jnz loopin3 
     pop temp_var
     inc si
     dec temp_var
     jnz loopout3     
-    dec step
     mov coll_detect,0   
     popa
     ret
-    collright: 
+    collright:      
     pop temp_var
-    dec step    
     mov coll_detect,1 
     popa      
 ret
@@ -1717,41 +1760,47 @@ check_right endp
 
 check_left proc 
     pusha  
-    inc step
-    mov ax,step
-    mov temp_var,ax 
     mov si,startr
-    loopout4:  
-    mov di,startc
-    push temp_var
-    mov ax,step
+    mov ax,length  
     mov temp_var,ax
+    inc temp_var
+    loopout4:
+    push temp_var   
+    mov di,startc  
+    mov ax,step    
+    mov temp_var,ax
+    inc temp_var   
     loopin4:
     mov ah,0Dh
     mov bh,00
     mov cx,di
     mov dx,si
     int 10h
-    cmp al,back_color
-    jnz collleft
+    cmp al,wall_col
+    jz collleft 
+    cmp al,frame_col
+    jz collleft 
+    cmp al,colora1
+    jz collleft 
+    cmp al,colorb1
+    jz collleft 
     inc di
     dec temp_var
-    jnz loopin4
+    jnz loopin4 
     pop temp_var
     inc si
     dec temp_var
     jnz loopout4     
-    dec step
     mov coll_detect,0   
     popa
     ret
-    collleft: 
-    pop temp_var
-    dec step    
+    collleft:           
+    pop temp_var    
     mov coll_detect,1 
     popa      
-    ret
+ret
 check_left endp
+
 
 move_up1 proc  
     pusha
@@ -1770,7 +1819,15 @@ move_up1 proc
     mov ax,step 
     add tank1+2,ax
     conti1: 
-    mov coll_detect,0
+    mov coll_detect,0 
+    mov ax,step
+    sub tank1+6,ax
+    sub tank1+10,ax 
+    sub tank1+14,ax
+    ;orientation up  
+    mov ax,tank1+52
+    add ax,0FFF0H
+    mov tank1+52,AX
     call tanka 
     call calc_points_up
     call calc_tank1    
@@ -1780,14 +1837,14 @@ move_up1 proc
 move_up1 endp 
 
 move_down1 proc
-    pusha 
+    pusha
     call tanka
-    call clear_tank 
+    call clear_tank
     call tankb
-    call draw_tank 
-    mov ax,step  
-    call tanka 
+    call draw_tank  
+    mov ax,step 
     add tank1+2,ax 
+    call tanka 
     call check_down  
     cmp coll_detect,1
     jz col2
@@ -1797,11 +1854,18 @@ move_down1 proc
     sub tank1+2,ax
     conti2:   
     mov coll_detect,0
-    call tanka 
+    mov ax,step
+    add tank1+6,ax
+    add tank1+10,ax 
+    add tank1+14,ax 
+    mov ax,tank1+52
+    add ax,0FFF3H
+    mov tank1+52,AX
+    call tanka   
     call calc_points_down
-    call calc_tank1     
+    call calc_tank1 
     call draw_tank
-    popa
+    popa        
     ret    
 move_down1 endp
 
@@ -1823,6 +1887,13 @@ move_right1 proc
     sub tank1,ax
     conti3:         
     mov coll_detect,0
+    mov ax,step
+    add tank1+4,ax
+    add tank1+8,ax 
+    add tank1+12,ax
+    mov ax,tank1+52
+    add ax,0FFF1H
+    mov tank1+52,AX
     call tanka  
     call calc_points_right
     call calc_tank1
@@ -1848,7 +1919,14 @@ move_left1 proc
     mov ax,step 
     add tank1,ax
     conti4:           
-    mov coll_detect,0
+    mov coll_detect,0  
+    mov ax,step
+    sub tank1+4,ax
+    sub tank1+8,ax 
+    sub tank1+12,ax 
+    mov ax,tank1+52
+    add ax,0FFF2H
+    mov tank1+52,AX
     call tanka 
     call calc_points_left
     call calc_tank1   
@@ -1871,10 +1949,17 @@ move_up2 proc
     jz col5
     jmp conti5
     col5:
-    mov ax,step 
+    mov ax,step
     add tank2+2,ax
     conti5: 
-    mov coll_detect,0
+    mov coll_detect,0  
+    mov ax,step
+    sub tank2+6,ax
+    sub tank2+10,ax 
+    sub tank2+14,ax 
+    mov ax,tank2+52
+    add ax,0FFF0H
+    mov tank2+52,AX
     call tankb 
     call calc_points_up
     call calc_tank2
@@ -1901,6 +1986,13 @@ move_down2 proc
     sub tank2+2,ax
     conti6:   
     mov coll_detect,0
+    mov ax,step
+    add tank2+6,ax
+    add tank2+10,ax 
+    add tank2+14,ax 
+    mov ax,tank2+52
+    add ax,0FFF3H
+    mov tank2+52,AX
     call tankb   
     call calc_points_down
     call calc_tank2 
@@ -1926,7 +2018,14 @@ move_right2 proc
     mov ax,step 
     sub tank2,ax
     conti7:   
-    mov coll_detect,0
+    mov coll_detect,0   
+    mov ax,step
+    add tank2+4,ax
+    add tank2+8,ax 
+    add tank2+12,ax 
+    mov ax,tank2+52
+    add ax,0FFF1H
+    mov tank2+52,AX
     call tankb 
     call calc_points_right
     call calc_tank2
@@ -1949,10 +2048,17 @@ move_left2 proc
     jz col8
     jmp conti8
     col8:
-    mov ax,step 
+    mov ax,step
     add tank2,ax
     conti8:   
-    mov coll_detect,0
+    mov coll_detect,0  
+    mov ax,step
+    sub tank2+4,ax
+    sub tank2+8,ax 
+    sub tank2+12,ax 
+    mov ax,tank2+52
+    add ax,0FFF2H
+    mov tank2+52,AX
     call tankb
     call calc_points_left
     call calc_tank2 

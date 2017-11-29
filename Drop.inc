@@ -115,9 +115,30 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
 	mov dx,[si] 
 	
 	innerloop:
-	mov ah,0ch
+	push ax 
 	push bx 
-	mov bh,00	
+	mov bh,00h
+	mov ah,0dh 	
+	int 10h
+	cmp al,00000000b
+	je draw
+	cmp al,1001b
+	je draw
+	cmp al,1011b
+	je draw
+	pop bx 
+	pop ax
+	inc cx
+	cmp cx,[bx+2]
+	je label 
+	jmp innerloop
+	draw:
+	pop bx
+	pop ax
+	
+	push bx
+	mov bh,00
+    mov ah,0ch
 	int 10h
 	pop bx
 	inc cx
@@ -129,7 +150,6 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
 	je label2
 	sub cx,10d
 	inc dx    
-	
 	jmp innerloop
 	label2:
 	add bx,08d
