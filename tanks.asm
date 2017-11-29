@@ -32,7 +32,7 @@ linecolor   db ,?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
-tank1 dw 200d,20d,240d,20d,240d,60d,200d,60d,  12d,6d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 220d,40d ,0721h ;three rectangles 2 words tankcenter  more word for hp and orientation
+tank1 dw 2d,2d,42d,2d,42d,42d,2d,42d,  12d,6d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 22d,22d ,0713h ;three rectangles 2 words tankcenter  more word for hp and orientation
 ;MOV AX,TANK1 + 52
 ;ABD AX,0FFF0H
 ;MOV TANK1+52,AX
@@ -56,7 +56,7 @@ lengtha1 dw ?
 lengtha2 dw ?       
 
 user2 label byte; +48 to get center + 52 to get orientation and hp word
-tank2 dw 200d,80d,240d,80d,240d,120d,200d,120d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 200d,100d ,0711h
+tank2 dw 598,377d,638d,377d,638d,417d,598d,417d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 618d,397d ,0710h
 
 shots2 dw 5d,0d 
 dw 0,0,0
