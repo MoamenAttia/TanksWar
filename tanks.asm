@@ -5,9 +5,10 @@
 ;10 left  
 
 include map.inc   
+include delay.inc
 ;include map2.inc
-;include Display.inc 
-;include Drop.inc
+include Display.inc 
+include Drop.inc
 ;include test.inc
 .model meduim
 .stack 64d
@@ -28,7 +29,10 @@ StartPointX dw ,?
 StartPointY dw ,?
 EndPointX   dw ,?
 EndPointY   dw ,?
-linecolor   db ,?
+linecolor   db ,?     
+
+st_time db ?
+end_time db ?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
@@ -42,13 +46,6 @@ dw 0,0,0
 dw 0,0,0
 dw 0,0,0
 dw 0,0,0  
-;equ user1_right  
-;equ user1_left
-;equ user1_up 
-;equ user1_down
-;equ user1_shoot 57d
-
-    
 
 colora1 db 4  
 lengtha dw 40d  
@@ -64,16 +61,9 @@ dw 0,0,0
 dw 0,0,0
 dw 0,0,0
 dw 0,0,0 
-;equ user2_right  
-;equ user2_left
-;equ user2_up 
-;equ user2_down
-;equ user2_shoot
-    
-
 
 colorb1 db 9   
-lengthb dw ?  
+lengthb dw 40d  
 lengthb1 dw ?   
 lengthb2 dw ?       
 
@@ -83,7 +73,7 @@ min_y dw 0
 max_y dw 0 
 
 damagedwall_pos dw ?,?,?  ; last word for power that wall hit with 
-shootspeed dw 2
+shootspeed dw 12
 GiftsX dw 20 dup(?)
 GiftsY dw 20 dup(?)
 
@@ -216,25 +206,13 @@ main endp
 
 input_and_flowcontrol proc near 
     pusha 
-    ;Drop GiftsX,GiftsY,tank1,tank2 
-    ;------------ 
-    
-    
-    
-    mov bx, offset shots2
-    mov di, offset tank1    
-    call process_shots
-    
-    mov bx, offset shots1
-    mov di, offset tank2
-    call process_shots 
-    
-    
-    ;------------  
+    Drop GiftsX,GiftsY,tank1,tank2 
+
     
     mov ah,1d
     int 16h 
-    jnz con 
+    jnz con
+     
     jmp already_comsumed 
     con:
     cmp ah,1ch
@@ -253,8 +231,7 @@ input_and_flowcontrol proc near
         jmp already_comsumed   
     noshoot_user2:
     
-        
- 
+
                    
     cmp ah,4Dh
     jz moveuser1 
@@ -303,7 +280,25 @@ input_and_flowcontrol proc near
     
     mov ah,0h
     int 16h
-    already_comsumed: 
+    already_comsumed:
+    
+    ;------------ 
+    
+    
+    
+    mov bx, offset shots2
+    mov di, offset tank1    
+    call process_shots
+    
+    mov bx, offset shots1
+    mov di, offset tank2
+    call process_shots 
+    
+    
+    ;------------ 
+         
+    stay 3 ; that means it will stay 10 / 100 of sec
+    ;----------
     
     mov bx, offset shots1
     add bx,4
@@ -440,7 +435,7 @@ inputshots proc near
         cmp cl , 3d
         jnz finish
         mov si,[bx +2]
-        add si ,21
+        add si ,21d
         mov [bx+2],si
     finish:      
      
@@ -781,18 +776,16 @@ process_shots proc near   ;bx on shots of attacker tank and di on victm tank
         push cx
         next: 
 
-        
-   
-        
+             
         add bx,6d   
         pop cx
     loop check_del_shots
     pop bx
       
-    mov cx,100
-    make_shots_stay_longer:
+;    mov cx,10
+;    make_shots_stay_longer:
      call drawshots
-    loop make_shots_stay_longer
+;    loop make_shots_stay_longer
      
 
     popa
@@ -892,11 +885,12 @@ drawshots proc near
     ; now bx on first shot
     mov cx,[bx-2] 
     cmp cx,0
+    mov si,bx
     jnz drawshotsloop 
     popa
-    ret
+    ret  
     drawshotsloop:
-         mov al ,0fh
+         mov al ,[si]+30
          call drawpx
          add bx,6d
     loop drawshotsloop
