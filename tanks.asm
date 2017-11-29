@@ -326,7 +326,10 @@ input_and_flowcontrol proc near
     
     ;------------ 
          
-    stay 3 ; that means it will stay 10 / 100 of sec
+    mov cx,200
+    justwait:
+    loop justwait 
+    
     ;----------
     
     mov bx, offset shots1
@@ -1823,14 +1826,15 @@ move_up1 proc
     sub tank1+14,ax
     ;orientation up  
     mov ax,tank1+52
-    add ax,0FFF0H
+    and ax,0fff0h
+    or ax,0000H
     mov tank1+52,AX
     call tanka 
     call calc_points_up
     call calc_tank1    
     call draw_tank 
     popa
-    ret    
+    ret          
 move_up1 endp 
 
 move_down1 proc
@@ -1855,8 +1859,9 @@ move_down1 proc
     add tank1+6,ax
     add tank1+10,ax 
     add tank1+14,ax 
-    mov ax,tank1+52
-    add ax,0FFF3H
+    mov ax,tank1+52 
+    and ax,0fff0h
+    or  ax,0003H
     mov tank1+52,AX
     call tanka   
     call calc_points_down
@@ -1889,7 +1894,8 @@ move_right1 proc
     add tank1+8,ax 
     add tank1+12,ax
     mov ax,tank1+52
-    add ax,0FFF1H
+    and ax,0fff0h
+    or  ax,0001H
     mov tank1+52,AX
     call tanka  
     call calc_points_right
@@ -1921,8 +1927,9 @@ move_left1 proc
     sub tank1+4,ax
     sub tank1+8,ax 
     sub tank1+12,ax 
-    mov ax,tank1+52
-    add ax,0FFF2H
+    mov ax,tank1+52 
+    and ax,0fff0h
+    or  ax,0002H
     mov tank1+52,AX
     call tanka 
     call calc_points_left
@@ -1955,7 +1962,8 @@ move_up2 proc
     sub tank2+10,ax 
     sub tank2+14,ax 
     mov ax,tank2+52
-    add ax,0FFF0H
+    and ax,0fff0h
+    or ax,0000H
     mov tank2+52,AX
     call tankb 
     call calc_points_up
@@ -1988,7 +1996,8 @@ move_down2 proc
     add tank2+10,ax 
     add tank2+14,ax 
     mov ax,tank2+52
-    add ax,0FFF3H
+    and ax,0fff0h
+    or ax,0003H
     mov tank2+52,AX
     call tankb   
     call calc_points_down
@@ -2021,7 +2030,8 @@ move_right2 proc
     add tank2+8,ax 
     add tank2+12,ax 
     mov ax,tank2+52
-    add ax,0FFF1H
+    and ax,0fff0h
+    or  ax,0001H
     mov tank2+52,AX
     call tankb 
     call calc_points_right
@@ -2054,7 +2064,8 @@ move_left2 proc
     sub tank2+8,ax 
     sub tank2+12,ax 
     mov ax,tank2+52
-    add ax,0FFF2H
+    and ax,0fff0h
+    or  ax,0002H
     mov tank2+52,AX
     call tankb
     call calc_points_left
