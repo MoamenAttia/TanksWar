@@ -31,8 +31,6 @@ EndPointX   dw ,?
 EndPointY   dw ,?
 linecolor   db ,?     
 
-st_time db ?
-end_time db ?
 
 
 user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
