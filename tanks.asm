@@ -9,6 +9,7 @@ include map.inc
 include map2.inc
 
 
+
 ;include Display.inc 
 
 include Drop.inc
@@ -877,7 +878,7 @@ moveshots proc near
             jnz cas_4
             mov si,[bx]
             ;---
-            sub si ,shootspeed 
+            cmp si ,shootspeed 
             jb overflow3 ; over flow check
             sub si ,shootspeed 
             jmp nooverflow3
