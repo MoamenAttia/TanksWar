@@ -79,7 +79,7 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
 	cmp [bx+6],00b
 	je Black
 	jmp lightCyan
-	lightBlue:
+	lightCyan:
 	mov al,1001b
 	jmp label3
 
