@@ -9,8 +9,6 @@ include map.inc
 include map2.inc
 
 
-include delay.inc
-
 ;include Display.inc 
 
 include Drop.inc
@@ -880,7 +878,8 @@ moveshots proc near
             mov si,[bx]
             ;---
             sub si ,shootspeed 
-            jo overflow3 ; over flow check 
+            jb overflow3 ; over flow check
+            sub si ,shootspeed 
             jmp nooverflow3
             overflow3:
             mov si,0
