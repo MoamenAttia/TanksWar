@@ -61,13 +61,15 @@ local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,boost_
 	jbe loop1
 	apply:
 	cmp cx,1
-	je boost_HP
+	je boost_Power
 	cmp cx,3
 	je boost_HP
 	cmp cx,5
-	je boost_HP
+	je boost_Power
 	cmp cx,2
+	je boost_Power
 	jmp boost_Power
+
 	boost_HP:
 	cmp [bx+6],11b
 	je ForSure1

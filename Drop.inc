@@ -67,7 +67,7 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
 	Black:
 	mov al,0000b
 	jmp label3
-	lightCyan:
+	lightblue:
 	mov al,1011b
 	jmp label3
 
@@ -78,7 +78,7 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
 	SecondGift:
 	cmp [bx+6],00b
 	je Black
-	jmp lightBlue
+	jmp lightCyan
 	lightBlue:
 	mov al,1001b
 	jmp label3
@@ -91,7 +91,7 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
 	ThirdGift:
 	cmp [bx+6],00b
 	je Black
-	jmp lightCyan
+	jmp lightblue
 
 
 	maybeFourth:
@@ -101,7 +101,7 @@ local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
 	FourthGift:
 	cmp [bx+6],00b
 	je Black
-	jmp lightBlue
+	jmp lightCyan
 
 
 	DefinitelyFifth:
