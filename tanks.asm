@@ -62,7 +62,7 @@ dw 0,0,0
 dw 0,0,0 
 
 
-colorb1 db 13  
+colorb1 db 13 
 lengthb dw 40d  
 lengthb1 dw ?   
 lengthb2 dw ?       
@@ -98,8 +98,9 @@ color1 dB ?
 ;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  
 step dw 5
 coll_detect dw 0
-wall_col db 0ch  
-frame_col db 03dh    
+wall_col db 0Ch  
+frame_col db 03h     
+wall_col2 db 0Eh
 temp_var dw 0
 
 .code 
@@ -112,8 +113,11 @@ main proc far
     mov bh,0
     mov ah,0
     mov al,12h
-    int 10h  
-    ;set all points of tanks
+    int 10h     
+    SetMap
+    ;set all points of tanks  
+    mov ax,lengtha   
+    mov lengthb,ax
     mov ax,tank1 
     mov tank1+12,ax
     add ax,lengtha
@@ -137,10 +141,34 @@ main proc far
     mov tank2+6,ax
     add ax,lengtha
     mov tank2+10,ax    
-    mov tank2+14,ax
-     
+    mov tank2+14,ax     
+    
+    ; centre
+    mov ax,lengtha
+    mov dl,2
+    div dl
+    mov bx,tank1
+    add bx,ax
+    mov tank1+48,bx
+    mov bx,tank1+2
+    add bx,ax
+    mov tank1+50,bx
+    
+    
+    
+    
+    mov ax,lengthb
+    mov dl,2
+    div dl
+    mov bx,tank2
+    add bx,ax
+    mov tank2+48,bx
+    mov bx,tank2+2
+    add bx,ax
+    mov tank2+50,bx
 
-   SetMap
+
+   
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     mov bx,offset GiftsX  
     mov Si,offset GiftsY  
@@ -206,8 +234,7 @@ main proc far
         
      
     
-    mov ax,lengtha   
-    mov lengthb,ax
+    
     
     
     ;\\\\\\\\\\\\\\\\\\\\
@@ -275,7 +302,17 @@ input_and_flowcontrol proc near
                 
     jmp no_move_user1    
     moveuser1:   
-     call tank_control
+     call tank_control  
+     ;reset centre 
+    mov ax,lengtha
+    mov dl,2
+    div dl
+    mov bx,tank1
+    add bx,ax
+    mov tank1+48,bx
+    mov bx,tank1+2
+    add bx,ax
+    mov tank1+50,bx
      jmp already_comsumed        
     no_move_user1:  
                         
@@ -295,7 +332,17 @@ input_and_flowcontrol proc near
                 
     jmp no_move_user2    
     moveuser2:   
-      call tank_control 
+      call tank_control
+      ;reset centre 
+    mov ax,lengthb
+    mov dl,2
+    div dl
+    mov bx,tank2
+    add bx,ax
+    mov tank2+48,bx
+    mov bx,tank2+2
+    add bx,ax
+    mov tank2+50,bx 
      jmp already_comsumed
             
     no_move_user2:  
@@ -311,9 +358,13 @@ input_and_flowcontrol proc near
     already_comsumed:
     
     ;------------ 
+    call tanka
+    call draw_tank
+    call tankb
+    call draw_tank 
     
     
-    
+    ;-----------
     mov bx, offset shots2
     mov di, offset tank1    
     call process_shots
@@ -1118,10 +1169,10 @@ damagewall proc near
     ret
 damagewall endp
 
-
+ 
  calc_tank1 proc 
     pusha           
-    
+   ;move values from temp values to permanent variables 
     mov ax,length
     mov bx,startr
     mov cx,startc
@@ -1141,9 +1192,10 @@ damagewall endp
     mov cx,startc2
     mov lengtha2,ax 
     mov tank1+34,bx
-    mov tank1+32,cx
+    mov tank1+32,cx 
+        
     mov ax,length
-    mov dl,2
+    mov dl,2             
     div dl    
     mov dx,tank1
     add dx,ax
@@ -1153,11 +1205,11 @@ damagewall endp
     mov tank1+50,dx
     popa
     ret
-calc_tank1 endp
+calc_tank1 endp                  
 
 calc_tank2 proc 
     pusha 
-       
+    ;move values from temp values to permanent variables   
     mov ax,length
     mov bx,startr
     mov cx,startc
@@ -1191,7 +1243,8 @@ calc_tank2 proc
     ret
 calc_tank2 endp    
 
-calc_length    proc 
+calc_length    proc  
+    ;calc smaller lengths
     pusha 
     mov ax,length
     mov dl,2
@@ -1647,6 +1700,8 @@ check_up proc
     jz collup 
     cmp al,colorb1
     jz collup 
+    cmp al,wall_col2
+    jz collup 
     inc si
     dec temp_var
     jnz loopin1  
@@ -1691,8 +1746,10 @@ check_down proc
     cmp al,colora1
     jz colldown 
     cmp al,colorb1
+    jz colldown   
+    cmp al,wall_col2
     jz colldown 
-    dec si 
+    dec si    
     dec temp_var
     jnz loopin2
     pop temp_var
@@ -1738,6 +1795,8 @@ check_right proc
     jz collright 
     cmp al,colorb1
     jz collright 
+    cmp al,wall_col2
+    jz collright 
     dec di   
     dec temp_var
     jnz loopin3 
@@ -1781,6 +1840,8 @@ check_left proc
     cmp al,colora1
     jz collleft 
     cmp al,colorb1
+    jz collleft  
+    cmp al,wall_col2
     jz collleft 
     inc di
     dec temp_var
@@ -1811,7 +1872,8 @@ move_up1 proc
     call tanka   
     call check_up 
     cmp coll_detect,1
-    jz col1
+    jz col1   
+    mov ax,0
     jmp conti1
     col1:
     mov ax,step 
@@ -1846,7 +1908,8 @@ move_down1 proc
     call tanka 
     call check_down  
     cmp coll_detect,1
-    jz col2
+    jz col2    
+    mov ax,0
     jmp conti2
     col2:
     mov ax,step 
@@ -1880,7 +1943,8 @@ move_right1 proc
     call tanka 
     call check_right 
     cmp coll_detect,1
-    jz col3
+    jz col3    
+    mov ax,0
     jmp conti3
     col3:
     mov ax,step 
@@ -1914,7 +1978,8 @@ move_left1 proc
     call tanka 
     call check_left  
     cmp coll_detect,1
-    jz col4
+    jz col4       
+    mov ax,0
     jmp conti4
     col4:
     mov ax,step 
@@ -1948,7 +2013,8 @@ move_up2 proc
     call tankb
     call check_up
     cmp coll_detect,1
-    jz col5
+    jz col5   
+    mov ax,0
     jmp conti5
     col5:
     mov ax,step
@@ -1982,7 +2048,8 @@ move_down2 proc
     call tankb 
     call check_down  
     cmp coll_detect,1
-    jz col6
+    jz col6        
+    mov ax,0
     jmp conti6
     col6:
     mov ax,step 
@@ -2016,7 +2083,8 @@ move_right2 proc
     call tankb
     call check_right 
     cmp coll_detect,1
-    jz col7
+    jz col7          
+    mov ax,0
     jmp conti7
     col7:
     mov ax,step 
@@ -2050,7 +2118,8 @@ move_left2 proc
     call tankb
     call check_left 
     cmp coll_detect,1
-    jz col8
+    jz col8     
+    mov ax,0
     jmp conti8
     col8:
     mov ax,step
