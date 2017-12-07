@@ -16,7 +16,7 @@ include Drop.inc
 .stack 64d
 .data            
 Score db 'Score: $'            
-
+BackToMainMenuFlag db 0
 WelcomeMessage db 10,13,10,13,13,13
                db '  **         **  ********  **    ********* ******** ***           *** ********',10,13
                db '  **         **  **        **    ********* *      * ** *        *  ** **' ,10,13
@@ -200,7 +200,9 @@ EnterSecondNameAgain:
     jmp LoopToSubmitPlayerTwo
     EndLoopToSubmitPlayerTwo:
     mov [SI-1],'$'
-   
+
+
+    mov BackToMainMenuFlag,0  
     mov ah,0
     mov al,12h
     int 10h
@@ -244,7 +246,7 @@ EnterSecondNameAgain:
    mov ah,0
    mov al,12h
    int 10h 
-   
+                                
    SetMap
    
    MoveCursor 1,23d
@@ -257,7 +259,26 @@ EnterSecondNameAgain:
 
    MoveCursor 1d,29d
    Display BackToMainMenu
-   ;SetMap
+   
+   MoveCursor 1,25d  
+   Display Bullets
+   mov cx,5
+   mov ah,9 	;Display
+   mov bh,0 	;Page 0
+   mov al,0FEH  ;Letter D
+   mov bl,0Ah ;Green (A) on white(F) background
+   int 10h            
+           
+   MoveCursor 41d,25d    
+   Display Bullets
+   mov cx,5
+   mov ah,9 	;Display
+   mov bh,0 	;Page 0
+   mov al,0FEH  ;Letter D
+   mov bl,0Ah ;Green (A) on white(F) background
+   int 10h            
+                   
+               
    call calc_square
     
    call calc_centre

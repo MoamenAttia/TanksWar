@@ -1,4 +1,5 @@
 include MoveCursor.inc
+include BackToMainMenu.inc
 UpdateStatus MACRO
 Local SomeLabel
 Local SomeLabel2
@@ -11,6 +12,17 @@ Local AboveAll
 Local ContinueTheGame
 Local EndTheGame2
 Local EndTheGame1
+Local AskUser
+Local RemoveOneBullet1
+Local DrawOneBullet1
+Local RemoveOneBullet
+Local DrawOneBullet
+Local TanksLives
+
+
+
+cmp BackToMainMenuFlag,1d
+	 je AskUser
 
 mov bl,FirstNameLastLife
 mov Ax,tank1+52
@@ -46,27 +58,78 @@ mov bl,00h ;Green (A) on white(F) background
 int 10h
 SomeLabel2:
 
+mov ax,shots1    ;max size
+mov bx,shots1+2  ;in the map 
+sub ax,bx  ; ax have the actual bullets player one have
+cmp al,	FirstNameLastBullets
+	jg DrawOneBullet
 
-MoveCursor 1d,25d
-Display Bullets
-XOR BX,BX
-mov cx,5d
-mov ah,9 	;Display
-mov bh,0 	;Page 0
-mov al,0FEH  ;Letter D
-mov bl,00h ;Green (A) on white(F) background
-int 10h
+cmp al,	FirstNameLastBullets
+	jl RemoveOneBullet
+jmp TanksLives
+DrawOneBullet:
+	mov cl,FirstNameLastBullets
+	mov FirstNameLastBullets,al
+	add cl,10d
+	MoveCursor cl,25d
+	XOR BX,BX
+	mov cx,1d
+	mov ah,9 	;Display
+	mov bh,0 	;Page 0
+	mov al,0FEH  ;Letter D
+	mov bl,0Ah ;Green (A) on white(F) background
+	int 10h
+	jmp TanksLives
+RemoveOneBullet:
+	mov FirstNameLastBullets,al
+	add al,10d
+	MoveCursor al,25d
+	XOR BX,BX
+	mov cx,1d
+	mov ah,9 	;Display
+	mov bh,0 	;Page 0
+	mov al,0FEH  ;Letter D
+	mov bl,00h ;Green (A) on white(F) background
+	int 10h
+	jmp TanksLives
 
-MoveCursor 41d,25d
-Display Bullets
-XOR BX,BX
-mov cx,5d
-mov ah,9 	;Display
-mov bh,0 	;Page 0
-mov al,0FEH  ;Letter D
-mov bl,00h ;Green (A) on white(F) background
-int 10h
 
+
+mov ax,shots2    ;max size
+mov bx,shots2+2  ;in the map 
+sub ax,bx  ; ax have the actual bullets player one have
+cmp al,	SecondNameLastBullets
+	jg DrawOneBullet1
+
+cmp al,	SecondNameLastBullets
+	jl RemoveOneBullet1
+jmp TanksLives
+DrawOneBullet1:
+	mov SecondNameLastBullets,al
+	add al,50d
+	MoveCursor al,25d
+	XOR BX,BX
+	mov cx,1d
+	mov ah,9 	;Display
+	mov bh,0 	;Page 0
+	mov al,0FEH  ;Letter D
+	mov bl,0Ah ;Green (A) on white(F) background
+	int 10h
+	jmp TanksLives
+RemoveOneBullet1:
+	mov SecondNameLastBullets,al
+	add al,50d
+	MoveCursor al,25d
+	XOR BX,BX
+	mov cx,1d
+	mov ah,9 	;Display
+	mov bh,0 	;Page 0
+	mov al,0FEH  ;Letter D
+	mov bl,00h ;Green (A) on white(F) background
+	int 10h
+	jmp TanksLives
+
+TanksLives:
 
 mov Ax,tank1+52
 mov al,ah
@@ -96,34 +159,7 @@ mov al,03  ;Letter D
 mov bl,00Ah ;Green (A) on white(F) background
 int 10h
 
-mov ax,shots1    ;max size
-mov bx,shots1+2  ;in the map 
-sub ax,bx
-mov cx,ax 
 
-MoveCursor 1d,25d
-Display Bullets
-XOR BX,BX
-mov ah,9 	;Display
-mov bh,0 	;Page 0
-mov al,0FEH  ;Letter D
-mov bl,00Ah ;Green (A) on white(F) background
-int 10h
-
-mov ax,shots2    ;max size
-mov bx,shots2+2  ;in the map 
-
-sub ax,bx
-mov cx,ax
-
-MoveCursor 41d,25d
-Display Bullets
-XOR BX,BX
-mov ah,9 	;Display
-mov bh,0 	;Page 0
-mov al,0FEH  ;Letter D
-mov bl,00Ah ;Green (A) on white(F) background
-int 10h
 
 
 
@@ -207,6 +243,11 @@ int 10h
 Display Winner
 xor bx,bx
 Display SecondPlayerName
+jmp ContinueTheGame
+
+AskUser: 
+	BackToMainMenuMACRO
+
 ContinueTheGame:
 
 ENDM UpdateStatus 
