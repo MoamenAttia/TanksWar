@@ -35,8 +35,8 @@ SecondNameLastScore db 0
 Lives      db 'Lives: $'
 Bullets    db 'Bullets: $'
 
-Question1 db '                           *To Start Chatting Press Enter',10,13,'$'
-Question2 db '                           *To Start Playing TanksWar Press F2',10,13,'$'
+Question1 db '                           *To Start Playing TanksWar Enter',10,13,'$'
+Question2 db '                           *To Start Chatting Press F2',10,13,'$'
 Question3 db '                           *To end the program Press ESC$'
                         
               
