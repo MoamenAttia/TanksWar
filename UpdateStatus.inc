@@ -18,7 +18,7 @@ Local DrawOneBullet1
 Local RemoveOneBullet
 Local DrawOneBullet
 Local TanksLives
-
+Local CalculateBulletsForTank2
 
 
 cmp BackToMainMenuFlag,1d
@@ -66,7 +66,7 @@ cmp al,	FirstNameLastBullets
 
 cmp al,	FirstNameLastBullets
 	jl RemoveOneBullet
-jmp TanksLives
+jmp CalculateBulletsForTank2
 DrawOneBullet:
 	mov cl,FirstNameLastBullets
 	mov FirstNameLastBullets,al
@@ -79,7 +79,7 @@ DrawOneBullet:
 	mov al,0FEH  ;Letter D
 	mov bl,0Ah ;Green (A) on white(F) background
 	int 10h
-	jmp TanksLives
+	jmp CalculateBulletsForTank2
 RemoveOneBullet:
 	mov FirstNameLastBullets,al
 	add al,10d
@@ -91,10 +91,10 @@ RemoveOneBullet:
 	mov al,0FEH  ;Letter D
 	mov bl,00h ;Green (A) on white(F) background
 	int 10h
-	jmp TanksLives
+	jmp CalculateBulletsForTank2
 
 
-
+CalculateBulletsForTank2:
 mov ax,shots2    ;max size
 mov bx,shots2+2  ;in the map 
 sub ax,bx  ; ax have the actual bullets player one have
@@ -105,9 +105,10 @@ cmp al,	SecondNameLastBullets
 	jl RemoveOneBullet1
 jmp TanksLives
 DrawOneBullet1:
+	mov cl,SecondNameLastBullets
 	mov SecondNameLastBullets,al
-	add al,50d
-	MoveCursor al,25d
+	add cl,50d
+	MoveCursor cl,25d
 	XOR BX,BX
 	mov cx,1d
 	mov ah,9 	;Display
