@@ -1,5 +1,5 @@
 Check_Passing_Through_Tank1 macro GiftsX,GiftsY,Tank1
-local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,boost_HP,boost_Power,ForSure1,ForSure2
+local loop1,label1,label2,label3,label4,labela,labelb,labelc,checkY,apply,boost_HP,boost_Power,ForSure1,ForSure2,tt
 
 	pusha
 	
