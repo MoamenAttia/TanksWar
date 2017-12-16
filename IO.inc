@@ -224,7 +224,7 @@ local EnterFirstNameAgain,no_more_send,no_more_recive,ExchangeNames
         mov dx,offset InDATA
         int 21h
         mov bx,offset InData+2
-        mov Si,offset FirstPlayerName
+        mov Si,offset player1Name
         mov ax,[bx]
         sub ax,'0'
         cmp al,9
@@ -233,7 +233,7 @@ local EnterFirstNameAgain,no_more_send,no_more_recive,ExchangeNames
     xor ch,ch
     mov cl,InData+1
     mov si,offset InData+2
-    mov di,offset FirstPlayerName
+    mov di,offset player1Name
     rep movsb
     
 	;sending and reciveing one by one
@@ -245,7 +245,7 @@ local EnterFirstNameAgain,no_more_send,no_more_recive,ExchangeNames
     mov ch,byte 
 	 
     mov bx,offset InData+2
-	mov si,offset SecondPlayerName
+	mov si,offset player2Name
     ExchangeNames:
 		
 		cmp cl,00h

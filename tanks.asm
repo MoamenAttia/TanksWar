@@ -47,12 +47,20 @@ PlayerMessage db 10,13,10,13,10,13
                    db "         Please enter your name : $"
 
 guest db 'Guest: $'
-Host db 'Host: $'              
+Host db 'Host: $' 
+             
 InDATA db 15,?,16 dup('$')
-FirstPlayerName db 16 dup('$')
-SecondPlayerName db 16 dup('$')
+Player1Name db 16 dup('$')
+Player1mess db ?,'$'   
+Player1CursorPos dw 0000h
+
+Player2Name db 16 dup('$')
+Player2mess db ?,'$' 
+Player2CursorPos dw 0000h    
+
 Winner db 'The Winner is : $' 
 DrawResult db 'Game is Draw$'
+EndChat db 'Press f3 to end chat with $'
 line label byte
 StartPointX dw ,?
 StartPointY dw ,?
@@ -114,13 +122,16 @@ startr2 dw ?
 startc2 dw ? 
 
 color1 dB ?
-;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  
+;------------------  
 step dw 5
 coll_detect dw 0
 wall_col db 0Ch  
 frame_col db 03h     
 wall_col2 db 0Eh
-temp_var dw 0
+temp_var dw 0  
+cursorpos dw 0000h  
+notbarcursorpos dw 0000h
+separatingline db '--------------------------------------------------------------------------------$'
 
 .code 
 main proc far 
@@ -129,59 +140,57 @@ main proc far
     mov es,ax  
     PortIntialization 
     clearscreentm  
-    Display  WelcomeMessage
-     
-    ReadNames   
-    endline 
-    endline
-    printstring FirstPlayerName
-    endline
-    printstring SecondPlayerName 
-   
+    Display  WelcomeMessage  
+    ReadNames              
+    
+;    endline 
+;    endline
+;    printstring Player1Name
+;    endline
+;    printstring Player2Name 
+;    hlt
                 
- ;
-;    mov BackToMainMenuFlag,0  
-;    mov ah,0
-;    mov al,12h
-;    int 10h
-;   
-;    
-;    Display WelcomeMessage
-;    
-;    xor bx,bx    
-;    mov ah,2
-;    mov dl,0
-;    mov dh,14d
-;    int 10h
-;    Display Question1
-;    xor bx,bx    
-;    mov ah,2
-;    mov dl,0
-;    mov dh,16d
-;    int 10h
-;    Display Question2
-;    xor bx,bx    
-;    mov ah,2
-;    mov dl,0
-;    mov dh,18d
-;    int 10h
-;    Display Question3
-;    
-;    ;-------------------  
-;    AyKalam: 
-;     mov ah,0
-;     int 16h  
-;     cmp Ax,3C00H 
-;        je printWarning
-;     cmp Ax,011BH
-;        je closeprogram
-;     jmp playgame    
-;    printWarning:
-;       ; Display WarningMessage      
-;     jmp AyKalam 
-;     ;---------------
-; 
-;  playgame:  
+ 
+    mov BackToMainMenuFlag,0  
+                           
+    clearscreentm
+    Display WelcomeMessage
+    
+    xor bx,bx    
+    mov ah,2
+    mov dl,0
+    mov dh,14d
+    int 10h
+    Display Question1
+    xor bx,bx    
+    mov ah,2
+    mov dl,0
+    mov dh,16d
+    int 10h
+    Display Question2
+    xor bx,bx    
+    mov ah,2
+    mov dl,0
+    mov dh,18d
+    int 10h
+    Display Question3
+    
+    ;-------------------  
+    query: 
+    mov ah,0
+    int 16h  
+    cmp Ax,3C00H 
+    je chatmode
+    cmp Ax,011BH
+    je closeprogram
+    jmp playgame    
+    chatmode:
+    startchattm    
+              
+    jmp query 
+     ;---------------
+ 
+  playgame:  
 ;   mov ah,0
 ;   mov al,12h
 ;   int 10h
@@ -191,11 +200,11 @@ main proc far
 ;   
 ;   MoveCursor 1,23d
 ;   Display Host
-;   Display FirstPlayerName
+;   Display Player1Name
 ;
 ;   MoveCursor 41d,23d
-;   Display Guest
-;   Display SecondPlayerName
+;   Display Guest                       
+;   Display Player2Name
 ;
 ;   MoveCursor 1d,29d
 ;   Display BackToMainMenu
@@ -225,7 +234,7 @@ main proc far
 ;     call input_and_flowcontrol    
 ;     UpdateStatus
 ;   jmp tankswar      
-;closeprogram:
+closeprogram:
 
 hlt
 main endp

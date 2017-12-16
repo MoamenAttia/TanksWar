@@ -4,28 +4,30 @@ StartChatTM macro
 	local start,con,again1,donotscroll1,donotscroll2
 	clearscreenTM	
 	
-	printstring user1name+2
-	mov user1mess,10d
-	printstring user1mess
-	mov user1mess,13d
-	printstring user1mess
-	getcursorpos user1cursorpos
+	printstring player1name
+	mov player1mess,10d
+	printstring player1mess
+	mov player1mess,13d
+	printstring player1mess
+	getcursorpos player1cursorpos
 	
 	mov cursorpos,000Ah
 	movecursorshehab cursorpos
 	printstring separatingline
 	printstring separatingline
 	
-	printstring user2name+2
-	mov user2mess,10d
-	printstring user2mess
-	mov user2mess,13d
-	printstring user2mess	
-	getcursorpos user2cursorpos
+	printstring player2name
+	mov player2mess,10d
+	printstring player2mess
+	mov player2mess,13d
+	printstring player2mess	
+	getcursorpos player2cursorpos
 	mov cursorpos,0017h
 	movecursorshehab cursorpos
 	printstring separatingline
 	getcursorpos notbarcursorpos
+	printstring EndChat
+	printstring player2name
 	
 	;screen ready for chat
 	start:
@@ -35,7 +37,7 @@ StartChatTM macro
 			mov ah,0h
 			int 16h 
 			push ax
-			mov ax,user1cursorpos
+			mov ax,player1cursorpos
 			cmp al,0ah
 			jnz donotscroll1
 				mov ax,0601h
@@ -47,15 +49,15 @@ StartChatTM macro
 				mov dx,0000h
 				mov bh,0
 				int 10h
-				mov user1cursorpos,0009h
+				mov player1cursorpos,0009h
 			donotscroll1:
 			pop ax
-			movecursorshehab user1cursorpos
-			mov user1mess,al
-			printstring user1mess ;print char in al
-			getcursorpos user1cursorpos
+			movecursorshehab player1cursorpos
+			mov player1mess,al
+			printstring player1mess ;print char in al
+			getcursorpos player1cursorpos
 
-			mov al,user1mess
+			mov al,player1mess
 			mov byte,al
 			send byte
 		con:
@@ -64,7 +66,7 @@ StartChatTM macro
 		and al,00000001b
 		jz start
 			push ax
-			mov ax,user2cursorpos
+			mov ax,player2cursorpos
 			cmp al,22d
 			jnz donotscroll2
 				mov ax,0601h
@@ -77,15 +79,15 @@ StartChatTM macro
 				xchg dh,dl
 				mov bh,0
 				int 10h
-				mov user2cursorpos,0015h
+				mov player2cursorpos,0015h
 			donotscroll2:
 			pop ax		
 		mov dx,3f8h
 		in al,dx
-		movecursorshehab user2cursorpos
-		mov user2mess,al
-		printstring user2mess ;print char in al
-		getcursorpos user2cursorpos
+		movecursorshehab player2cursorpos
+		mov player2mess,al
+		printstring player2mess ;print char in al
+		getcursorpos player2cursorpos
 	jmp start
 	popa
 endm StartChatTM
@@ -93,11 +95,11 @@ endm StartChatTM
 ; StartChatVM macro
 	; pusha
 	; clearscreenVM
-	; printstring user1name+2
+	; printstring player1name+2
 	; mov word ptr cursorpos,000bh
 	; movecursorshehab cursorpos
 	; printstring separatingline
-	; printstring user2name+2	
+	; printstring player2name+2	
 	; mov word ptr cursorpos,0017h
 	; movecursorshehab cursorpos
 	; printstring separatingline
