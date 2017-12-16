@@ -2,19 +2,21 @@
 ;00 up
 ;11 down
 ;01 right
-;10 left  
-include newmap.inc   
+;10 left 
+;80x25 char 640*480 px 16colors 
+;include newmap.inc   
 include Display.inc
-include map2.inc
-include ReloadLivesScore.inc
-include UpdateStatus.inc
-;include Display.inc 
-
-include Drop.inc
+;include map2.inc
+;include ReloadLivesScore.inc
+include UpdateStatus.inc  
+include Chat.inc
+include Intialization.inc
+;include Drop.inc
 
 .model meduim
 .stack 64d
-.data            
+.data 
+Byte db ?           
 Score db 'Score: $'            
 BackToMainMenuFlag db 0
 WelcomeMessage db 10,13,10,13,13,13
@@ -35,25 +37,18 @@ SecondNameLastScore db 0
 Lives      db 'Lives: $'
 Bullets    db 'Bullets: $'
 
-Question1 db '                           *To Start Playing TanksWar Enter',10,13,'$'
-Question2 db '                           *To Start Chatting Press F2',10,13,'$'
-Question3 db '                           *To end the program Press ESC$'
-                        
-              
-DoYoWantToPlay db 10,13,10,13,10,13,'                         If You want to play ,, press any key$'           
+Question1 db '                           *To start playing tankswar enter',10,13,'$'
+Question2 db '                           *To start chatting press F2',10,13,'$'
+Question3 db '                           *To end the program press ESC$'
+                      
 BackToMainMenu db '-If you want to return back to Main Menu or restart the game press F4$'
 
-FirstPlayerMessage db 10,13,10,13,10,13
-                   db "         please Enter The Host Name : $"
-SecondPlayerMessage db 10,13
-                    db "         please Enter The Guest Name: $"   
+PlayerMessage db 10,13,10,13,10,13
+                   db "         Please enter your name : $"
 
 guest db 'Guest: $'
-Host db 'Host: $'
-WarningMessage db 10,13,'Chatting will be in phase two $'             
-InDATA db 30,?,30 dup('$')
-InDATA2 db 30,?,30 dup('$')
-
+Host db 'Host: $'              
+InDATA db 15,?,16 dup('$')
 FirstPlayerName db 16 dup('$')
 SecondPlayerName db 16 dup('$')
 Winner db 'The Winner is : $' 
@@ -65,9 +60,7 @@ EndPointX   dw ,?
 EndPointY   dw ,?
 linecolor   db ,?     
 
-
-
-user1 label byte; +48 to get center + 52 to get orientation and hp word                                                                                                     
+                                                                                                 
 tank1 dw 2d,2d,42d,2d,42d,42d,2d,42d,  12d,6d,60d,120d,60d,140d,40d,140d, 45d,115d,55d,115d,55d,120d,45d,120d, 22d,22d ,0713h ;three rectangles 2 words tankcenter  more word for hp and orientation
 shots1 dw 5d,0d
 dw 0,0,0
@@ -81,7 +74,6 @@ lengtha dw 40d
 lengtha1 dw ?  
 lengtha2 dw ?       
 
-user2 label byte; +48 to get center + 52 to get orientation and hp word
 tank2 dw 598,317d,638d,377d,638d,417d,598d,417d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 618d,397d ,0710h
 
 shots2 dw 5d,0d 
@@ -134,253 +126,113 @@ temp_var dw 0
 main proc far 
     mov AX,@Data
     mov DS,AX
-    mov es,ax     
-    
-    mov ah,0
-    mov al,12h
-    int 10h
-    
-    Display  WelcomeMessage 
-
-EnterFirstNameAgain:
-    xor bx,bx    
-    mov ah,2
-    mov dl,0
-    mov dh,14d
-    int 10h
-    Display FirstPlayerMessage  
- 
-    mov ah,0AH
-    mov dx,offset InDATA
-    int 21h
-    
-    mov bx,offset InData+2
-    mov Si,offset FirstPlayerName
-    mov ax,[bx]
-    sub ax,'0'
-    cmp al,9
-       jle EnterFirstNameAgain
- 
-    LoopToSubmitPlayerOne:
-    cmp [bX],'$'
-        je EndLoopToSubmitPlayerOne
-    mov Ax,[BX]
-    mov [Si],AX
-    inc SI
-    inc BX
-    jmp LoopToSubmitPlayerOne
-    EndLoopToSubmitPlayerOne:
-    mov [SI-1],'$'
-EnterSecondNameAgain:
-    xor bx,bx
-    mov ah,2
-    mov dl,0d
-    mov dh,20d
-    int 10h
-    Display SecondPlayerMessage
-
-    mov ah,0AH
-    mov dx,offset InDATA2
-    int 21h                    
-    
-    mov bx,offset InData2+2
-    mov Si,offset SecondPlayerName
-    mov ax,[bx]
-    sub ax,'0'
-    cmp al,9
-        jle EnterSecondNameAgain
-    
-    LoopToSubmitPlayerTwo:
-    cmp [bX],'$'
-        je EndLoopToSubmitPlayerTwo
-    mov Ax,[BX]
-    mov [Si],AX
-    inc SI
-    inc BX
-    jmp LoopToSubmitPlayerTwo
-    EndLoopToSubmitPlayerTwo:
-    mov [SI-1],'$'
-
-
-    mov BackToMainMenuFlag,0  
-    mov ah,0
-    mov al,12h
-    int 10h
-   
-    
-    Display WelcomeMessage
-    
-    xor bx,bx    
-    mov ah,2
-    mov dl,0
-    mov dh,14d
-    int 10h
-    Display Question1
-    xor bx,bx    
-    mov ah,2
-    mov dl,0
-    mov dh,16d
-    int 10h
-    Display Question2
-    xor bx,bx    
-    mov ah,2
-    mov dl,0
-    mov dh,18d
-    int 10h
-    Display Question3
-    
-      
-    AyKalam: 
-     mov ah,0
-     int 16h  
-     cmp Ax,3C00H 
-        je printWarning
-     cmp Ax,011BH
-        je closeprogram
-     jmp playgame    
-    printWarning:
-        Display WarningMessage      
-        jmp AyKalam
- 
-  playgame:  
-   mov ah,0
-   mov al,12h
-   int 10h 
-                                
-   SetMap
-   
-   MoveCursor 1,23d
-   Display Host
-   Display FirstPlayerName
-
-   MoveCursor 41d,23d
-   Display Guest
-   Display SecondPlayerName
-
-   MoveCursor 1d,29d
-   Display BackToMainMenu
-   
-   MoveCursor 1,25d  
-   Display Bullets
-   mov cx,5
-   mov ah,9 	;Display
-   mov bh,0 	;Page 0
-   mov al,0FEH  ;Letter D
-   mov bl,0Ah ;Green (A) on white(F) background
-   int 10h            
-           
-   MoveCursor 41d,25d    
-   Display Bullets
-   mov cx,5
-   mov ah,9 	;Display
-   mov bh,0 	;Page 0
-   mov al,0FEH  ;Letter D
-   mov bl,0Ah ;Green (A) on white(F) background
-   int 10h            
-                   
-               
-   call calc_square
-    
-   call calc_centre
-    
-    
-
-
-   
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    mov bx,offset GiftsX  
-    mov Si,offset GiftsY  
-    
-    
-    mov word ptr [bx],75d
-    mov word ptr [bx+2],85d
-    mov word ptr [bx+4],80d
-    mov word ptr [bx+6],11b
-    
-    
-    mov word ptr [bx+8],555d
-    mov word ptr [bx+10],565d
-    mov word ptr [bx+12],560d
-    mov word ptr [bx+14],11b
-    
-    mov word ptr [bx+16],315d
-    mov word ptr [bx+18],325d
-    mov word ptr [bx+20],320d
-    mov word ptr [bx+22],11b
-    
-    mov word ptr [bx+24],315d
-    mov word ptr [bx+26],325d
-    mov word ptr [bx+28],320d
-    mov word ptr [bx+30],11b
-    
-    mov word ptr [bx+32],315d
-    mov word ptr [bx+34],325d
-    mov word ptr [bx+36],320d
-    mov word ptr [bx+38],11b
-    
-    
-    
-    mov word ptr [si],175d
-    mov word ptr [si+2],185d
-    mov word ptr [si+4],180d
-    mov word ptr [si+6],11b
-    
-    
-    mov word ptr [si+8],175d
-    mov word ptr [si+10],185d
-    mov word ptr [si+12],180d
-    mov word ptr [si+14],11b
-    
-    
-    mov word ptr [si+16],170d
-    mov word ptr [si+18],180d
-    mov word ptr [si+20],175d
-    mov word ptr [si+22],11b
-    
-    mov word ptr [si+24],50d
-    mov word ptr [si+26],60d
-    mov word ptr [si+28],55d
-    mov word ptr [si+30],11b
-    
-    mov word ptr [si+32],305d
-    mov word ptr [si+34],315d
-    mov word ptr [si+36],310d
-    mov word ptr [si+38],11b   
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    
-        
+    mov es,ax  
+    PortIntialization 
+    clearscreentm  
+    Display  WelcomeMessage
      
-    
-    
-    
-    
-    ;\\\\\\\\\\\\\\\\\\\\
-    call tanka
-    call calc_length
-    call calc_points_down
-    call calc_tank1  
-    ;\\\\\\\\\\\\\\\\\\\\\\   
-    call tankb
-    call calc_length
-    call calc_points_up
-    call calc_tank2
-    ;///////////////////////////////////////////////////////////////////////////////////////////////////////   
-    call tanka
-    call draw_tank
-    call tankb
-    call draw_tank  
-    tankswar:     
-    call input_and_flowcontrol    
-     UpdateStatus
-    jmp tankswar    
-    hlt 
-closeprogram:
-ret
+    ReadNames   
+    endline 
+    endline
+    printstring FirstPlayerName
+    endline
+    printstring SecondPlayerName 
+   
+                
+ ;
+;    mov BackToMainMenuFlag,0  
+;    mov ah,0
+;    mov al,12h
+;    int 10h
+;   
+;    
+;    Display WelcomeMessage
+;    
+;    xor bx,bx    
+;    mov ah,2
+;    mov dl,0
+;    mov dh,14d
+;    int 10h
+;    Display Question1
+;    xor bx,bx    
+;    mov ah,2
+;    mov dl,0
+;    mov dh,16d
+;    int 10h
+;    Display Question2
+;    xor bx,bx    
+;    mov ah,2
+;    mov dl,0
+;    mov dh,18d
+;    int 10h
+;    Display Question3
+;    
+;    ;-------------------  
+;    AyKalam: 
+;     mov ah,0
+;     int 16h  
+;     cmp Ax,3C00H 
+;        je printWarning
+;     cmp Ax,011BH
+;        je closeprogram
+;     jmp playgame    
+;    printWarning:
+;       ; Display WarningMessage      
+;     jmp AyKalam 
+;     ;---------------
+; 
+;  playgame:  
+;   mov ah,0
+;   mov al,12h
+;   int 10h
+;   DataIntialization 
+;                                
+;   SetMap
+;   
+;   MoveCursor 1,23d
+;   Display Host
+;   Display FirstPlayerName
+;
+;   MoveCursor 41d,23d
+;   Display Guest
+;   Display SecondPlayerName
+;
+;   MoveCursor 1d,29d
+;   Display BackToMainMenu
+;   
+;   MoveCursor 1,25d  
+;   Display Bullets
+;   mov cx,5
+;   mov ah,9 	;Display
+;   mov bh,0 	;Page 0
+;   mov al,0FEH  ;Letter D
+;   mov bl,0Ah ;Green (A) on white(F) background
+;   int 10h            
+;           
+;   MoveCursor 41d,25d    
+;   Display Bullets
+;   mov cx,5
+;   mov ah,9 	;Display
+;   mov bh,0 	;Page 0
+;   mov al,0FEH  ;Letter D
+;   mov bl,0Ah ;Green (A) on white(F) background
+;   int 10h            
+;                   
+;  
+;              
+;
+;   tankswar:     
+;     call input_and_flowcontrol    
+;     UpdateStatus
+;   jmp tankswar      
+;closeprogram:
+
+hlt
 main endp
   
 input_and_flowcontrol proc near 
     pusha 
-    Drop GiftsX,GiftsY,tank1,tank2 
+  ;  Drop GiftsX,GiftsY,tank1,tank2 
   
     mov ah,1d
     int 16h 
@@ -498,7 +350,7 @@ input_and_flowcontrol proc near
     ;------------ 
      ; wait int
      mov cx,0  
-     mov dx,8000d
+     mov dx,7000d
      mov ah,86h
      int 15h       
     ;----------
@@ -2395,7 +2247,10 @@ tank_control proc
     walk:
     popa
     ret
-tank_control endp
+tank_control endp 
+
+
+
 end main
                                  
                                  

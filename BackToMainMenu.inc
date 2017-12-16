@@ -1,4 +1,4 @@
-    BackToMainMenuMACRO MACRO 
+BackToMainMenuMACRO MACRO 
     Local AyKalam1
     Local printWarning1
     Local playgame1
@@ -39,7 +39,7 @@
         je closeprogram
      jmp playgame    
     printWarning1:
-        Display WarningMessage      
+        ;Display WarningMessage      
         jmp AyKalam
  
   playgame1:  
@@ -143,6 +143,6 @@
     call tanka
     call draw_tank
     call tankb
-    call draw_tank  
-
-    ENDM BackToMainMenuMACRO
+    call draw_tank 
+	
+ENDM BackToMainMenuMACRO
