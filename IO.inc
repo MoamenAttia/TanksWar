@@ -125,7 +125,7 @@ clearscreenTM macro
 	mov bh,0
 	int 10h
 	popa
-endm clearscreen
+endm clearscreenTM
 ;-----------------------------------------------------------
 ;*clearscreen in videomode 
 clearscreenVM macro
@@ -141,7 +141,7 @@ clearscreenVM macro
 	mov bh,0
 	int 10h
 	popa
-endm clearscreen
+endm clearscreenVM
 ;------------------------------------------------------------
 ;*moving cursor to pos
 movecursorshehab macro cursorpos
@@ -175,6 +175,143 @@ getcursorpos macro cursorpos
 	mov cursorpos,dx
 	popa
 endm getcursorpos
+;----------------------------------------
+;display second mainmenu questions
+DisplayQuestions macro
+	pusha
+    mov cursorpos,000eh
+    movecursorshehab cursorpos
+    Display Question1 
+    mov cursorpos,000fh
+    movecursorshehab cursorpos
+    Display Question2   
+    mov cursorpos,0010h
+    movecursorshehab cursorpos
+    Display Question3	
+	mov cursorpos,0014h
+	movecursorshehab cursorpos
+	Display separatingline
+	getcursorpos notbarcursorposinmainmenu
+	popa
+endm DisplayQuestions
+
+
+
+
+exitgame macro
+local lol
+	pusha
+	clearscreenTM
+	mov cursorpos ,280ah
+	movecursorshehab cursorpos
+	printstring ExitProgramMess
+	popa
+	lol:
+	jmp lol
+endm exitgame
+
+IRecGameInvMess macro
+local donotscroll
+	pusha
+	movecursorshehab notbarcursorposinmainmenu
+	getcursorpos cursorpos
+	mov ax,cursorpos
+	cmp al,23d
+	jnz donotscroll
+		mov ax,0601h
+		mov bh,07h
+		mov cx,1500h
+		mov dx,164fh
+		int 10h
+		mov notbarcursorposinmainmenu,0016h
+	donotscroll:
+	movecursorshehab notbarcursorposinmainmenu  
+	mov tmpmess,'-'
+	printstring tmpmess
+	mov tmpmess,' '
+	printstring tmpmess           
+	printstring player2name
+	printstring ReplyingToGameInvitationMessage 
+	endline
+	getcursorpos notbarcursorposinmainmenu	
+	popa
+endm IRecGameInvMess
+
+ISendGameInvMess macro
+	local donotscroll
+	pusha
+	movecursorshehab notbarcursorposinmainmenu
+	getcursorpos cursorpos
+	mov ax,cursorpos
+	cmp al,23d
+	jnz donotscroll
+		mov ax,0601h
+		mov bh,07h
+		mov cx,1500h
+		mov dx,164fh
+		int 10h
+		mov notbarcursorposinmainmenu,0016h
+	donotscroll:
+	movecursorshehab notbarcursorposinmainmenu
+	printstring  GameInvitationMessage 
+	printstring player2Name
+	endline
+	getcursorpos notbarcursorposinmainmenu 
+	popa
+endm ISendGameInvMess
+
+
+IRecChatInvMess macro
+local donotscroll
+	pusha
+	movecursorshehab notbarcursorposinmainmenu
+	getcursorpos cursorpos
+	mov ax,cursorpos
+	cmp al,23d
+	jnz donotscroll
+		mov ax,0601h
+		mov bh,07h
+		mov cx,1500h
+		mov dx,164fh
+		int 10h
+		mov notbarcursorposinmainmenu,0016h
+	donotscroll:
+	movecursorshehab notbarcursorposinmainmenu  
+	mov tmpmess,'-'
+	printstring tmpmess
+	mov tmpmess,' '
+	printstring tmpmess           
+	printstring player2name
+	printstring ReplyingToChatInvitationMessage 
+	endline
+	getcursorpos notbarcursorposinmainmenu
+	popa
+endm IRecChatInvMess
+
+
+ISendChatInvMess macro
+local donotscroll
+	pusha
+	movecursorshehab notbarcursorposinmainmenu
+	getcursorpos cursorpos
+	mov ax,cursorpos
+	cmp al,23d
+	jnz donotscroll
+		mov ax,0601h
+		mov bh,07h
+		mov cx,1500h
+		mov dx,164fh
+		int 10h
+		mov notbarcursorposinmainmenu,0016h
+	donotscroll:
+	movecursorshehab notbarcursorposinmainmenu
+	printstring  ChatInvitationMessage 
+	printstring player2Name
+	endline
+	getcursorpos notbarcursorposinmainmenu 
+	popa
+endm ISendChatInvMess
+
 ;--------------------------------------serial--------------------------------
 ;serial macros
 send macro byte ; sending with wating
@@ -219,7 +356,11 @@ local EnterFirstNameAgain,no_more_send,no_more_recive,ExchangeNames
         mov dl,0
         mov dh,14d
         int 10h
-        Display PlayerMessage  
+        Display PlayerMessage 
+		getcursorpos cursorpos
+		endline
+		Display EnterNameMess
+		movecursorshehab cursorpos
         mov ah,0AH
         mov dx,offset InDATA
         int 21h
@@ -246,8 +387,7 @@ local EnterFirstNameAgain,no_more_send,no_more_recive,ExchangeNames
 	 
     mov bx,offset InData+2
 	mov si,offset player2Name
-    ExchangeNames:
-		
+    ExchangeNames:	
 		cmp cl,00h
 		jz no_more_send
 			mov al,[bx]
@@ -265,11 +405,223 @@ local EnterFirstNameAgain,no_more_send,no_more_recive,ExchangeNames
 			inc si
 			dec ch
 		no_more_recive:
-		
 		cmp cx,0000h
     jnz ExchangeNames 
-
 endm ReadNames
+;------------------------------
+;processinganswers 
+ProcessingAnswers macro
+local NoChatToTheOther,donotscroll,exit,nothingrecived,mainloop,notexitbyte,notexitbyte2,notexitbyte3,chkrecacc,notgamebyte,notgamebyte2,startchating,gamesection,NoExit
+	pusha
+	;---------------------
+    mainloop:
+    mov al,RChatinv
+	cmp al,1
+	je  chkrecacc
+	
+	
+	mov dx,3fdh
+	in al,dx
+	and al,1h
+	
+	jz nothingrecived
+	recive byte
+	mov al,byte
+	
+	cmp al,gamebyte
+	jne notgamebyte
+		mov al,Rgameinv
+		cmp al,1
+		je chkgameacc
+		mov Rgameinv,1
+		mov RChatinv,0
+		mov Rexitinv,0
+		IRecGameInvMess	
+		jmp chkgameacc
+	notgamebyte:
+	
+	cmp al,exitbyte
+	jne notexitbyte
+		mov Rexitinv,0
+		mov RChatinv,0
+		mov Rexitinv,0
+		exitgame
+	notexitbyte:
+	
+	mov RChatinv,1
+	;-----------------printing
+	IRecChatInvMess
+	;-----------------
+	   
+	chkrecacc:  
+    mov ah,1
+	int 16h
+	jz NoChatToTheOther
+	cmp ah,F1
+	jne NoChatToTheOther
+	mov ah,0
+	int 16h
+	mov al,RChatinv
+	cmp al,1
+	je startchating
+	nothingrecived:
+	
+	mov ah,1
+	int 16h
+	jz NoChatToTheOther
+	cmp ah,F1
+	jne NoChatToTheOther
+	mov ah,0
+	int 16h
+	
+	mov al,ChatByte
+	mov Byte,al
+	Send Byte
+	;clearing all other Rinvs
+	mov Rgameinv,0
+	mov RChatinv,0
+	mov Rexitinv,0
+	
+	ISendChatInvMess
+	
+	recive byte
+	mov al,byte
+	
+	cmp al,gamebyte
+	jne notgamebyte2
+		mov al,Rgameinv
+		cmp al,1
+		je chkgameacc
+		mov Rgameinv,1
+		mov RChatinv,0
+		mov Rexitinv,0
+		IRecGameInvMess
+		jmp chkgameacc
+	notgamebyte2:
+		
+	cmp al,exitbyte
+	jne notexitbyte2
+		mov Rexitinv,0
+		mov RChatinv,0
+		mov Rexitinv,0
+		exitgame
+	notexitbyte2:
+	
+	cmp al,chatbyte 
+	
+	jne NoChatToTheOther
+		mov Rgameinv,0
+		mov RChatinv,0
+		mov Rexitinv,0	
+	    startchattm   
+		jmp exit
+	jmp NoChatToTheOther
+startchating: 
+    mov RChatinv,0
+	mov Rgameinv,0
+	mov Rexitinv,0
+	mov al,ChatByte
+	mov Byte,al
+	Send Byte
+	startchattm
+	NoChatToTheOther:
+;--------------------------------------------------------------------------------------------------------------------------------------------------
+gamesection:
+	mov al,Rgameinv
+	cmp al,1
+	jne  nogameinvcome
+	chkgameacc:
+		mov ah,1
+		int 16h
+		jz NoGameWithOther
+		cmp ah,F2
+		jne NoGameWithOther
+		mov ah,0
+		int 16h
+		jmp startplayingafteracc
+	nogameinvcome:
+	
+	
+	mov ah,1
+	int 16h
+	jz NoGameWithOther
+	cmp ah,F2
+	jne NoGameWithOther
+	mov ah,0
+	int 16h
+	
+	mov al,GameByte
+	mov Byte,al
+	Send Byte
+	mov Rgameinv,0
+	mov RChatinv,0
+	mov Rexitinv,0
+	ISendGameInvMess
+	recive byte
+	mov al,byte
+	cmp al,chatbyte
+	jne notchatbyte3
+		mov al,RChatinv
+		cmp al,1
+		je notchatbyte3
+		IRecChatInvMess
+		mov RChatinv,1
+		mov Rgameinv,0
+		mov Rexitinv,0
+	jmp  mainloop
+	notchatbyte3:
+	
+	cmp al,exitbyte
+	jne notexitbyte3
+		mov Rexitinv,0
+		mov RChatinv,0
+		mov Rexitinv,0
+		exitgame
+	notexitbyte3:
+jmp startplaying	
+
+startplayingafteracc:	
+	mov al,GameByte
+	mov Byte,al
+	Send Byte
+	
+startplaying:
+	mov Rgameinv,0
+	mov RChatinv,0
+	mov Rexitinv,0
+	clearscreenTM
+	
+	printstring player1Name
+	printstring player1Name
+	printstring player1Name
+	printstring player2Name
+	printstring player2Name
+	printstring player2Name
+	
+	;;;;;;;;;;;;;;;;;;;;;;;;;game logic
+	jmp mainloop
+NoGameWithOther:
+	
+	mov ah,1
+	int 16h
+	jz NoExit
+	cmp ah,Escape
+	jne NoExit
+	mov ah,0
+	int 16h
+	mov al,exitbyte
+	mov byte,al
+	send byte
+	mov Rexitinv,0
+	mov RChatinv,0
+	mov Rexitinv,0
+	exitgame
+	NoExit:
+	
+	jmp mainloop 
+	exit:
+	popa
+endm ProcessingAnswers
 
 
 

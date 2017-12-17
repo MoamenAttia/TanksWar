@@ -1,7 +1,7 @@
 include IO.inc
 StartChatTM macro
 	pusha
-	local start,con,again1,donotscroll1,donotscroll2
+	local start,con,again1,donotscroll1,donotscroll2,chatdone,endchat
 	clearscreenTM	
 	
 	printstring player1name
@@ -25,8 +25,8 @@ StartChatTM macro
 	mov cursorpos,0017h
 	movecursorshehab cursorpos
 	printstring separatingline
-	getcursorpos notbarcursorpos
-	printstring EndChat
+	getcursorpos notbarcursorposingame
+	printstring EndChatMess
 	printstring player2name
 	
 	;screen ready for chat
@@ -36,6 +36,13 @@ StartChatTM macro
 		jz con
 			mov ah,0h
 			int 16h 
+			cmp ah,F3
+			jne endchat
+				mov al,exitbyte
+				mov byte,al
+				send byte
+				jmp chatdone
+			endchat:
 			push ax
 			mov ax,player1cursorpos
 			cmp al,0ah
@@ -44,10 +51,6 @@ StartChatTM macro
 				mov bh,07h
 				mov cx,0100h
 				mov dx,094fh
-				int 10h
-				mov ah,02h
-				mov dx,0000h
-				mov bh,0
 				int 10h
 				mov player1cursorpos,0009h
 			donotscroll1:
@@ -84,12 +87,17 @@ StartChatTM macro
 			pop ax		
 		mov dx,3f8h
 		in al,dx
+		mov ch,exitbyte
+		cmp al,ch
+		je chatdone
 		movecursorshehab player2cursorpos
 		mov player2mess,al
 		printstring player2mess ;print char in al
 		getcursorpos player2cursorpos
 	jmp start
+	chatdone:
 	popa
+	jmp SartingFromMainMenu
 endm StartChatTM
 
 ; StartChatVM macro

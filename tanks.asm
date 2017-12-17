@@ -37,14 +37,20 @@ SecondNameLastScore db 0
 Lives      db 'Lives: $'
 Bullets    db 'Bullets: $'
 
-Question1 db '                           *To start playing tankswar enter',10,13,'$'
-Question2 db '                           *To start chatting press F2',10,13,'$'
+Question1 db '                           *To start chatting press F1',10,13,'$'
+Question2 db '                           *To start TanksWar game press F2',10,13,'$'
 Question3 db '                           *To end the program press ESC$'
                       
 BackToMainMenu db '-If you want to return back to Main Menu or restart the game press F4$'
 
 PlayerMessage db 10,13,10,13,10,13
-                   db "         Please enter your name : $"
+                   db '         Please enter your name :',10,13,'                     $'  
+                   
+ChatInvitationMessage db '- You Sent a Chat Invitation To $' 
+GameInvitationMessage db '- You Sent a Game Invitation To $'
+ReplyingToChatInvitationMessage db ' sent you a Chat invitation, to accept press f1$' 
+ReplyingToGameInvitationMessage db ' sent you a Game invitation, to accept press f2$'
+ExitProgramMess db 'Program is exited!!!$'
 
 guest db 'Guest: $'
 Host db 'Host: $' 
@@ -60,7 +66,8 @@ Player2CursorPos dw 0000h
 
 Winner db 'The Winner is : $' 
 DrawResult db 'Game is Draw$'
-EndChat db 'Press f3 to end chat with $'
+EndChatMess db 'Press f3 to end chat with $'     
+EnterNameMess db '         Press enter to conitinue $'
 line label byte
 StartPointX dw ,?
 StartPointY dw ,?
@@ -91,7 +98,7 @@ dw 0,0,0
 dw 0,0,0
 dw 0,0,0 
 
-colorb1 db 13 
+colorb1 db 13                   
 lengthb dw 40d  
 lengthb1 dw ?   
 lengthb2 dw ?       
@@ -130,9 +137,26 @@ frame_col db 03h
 wall_col2 db 0Eh
 temp_var dw 0  
 cursorpos dw 0000h  
-notbarcursorpos dw 0000h
+tmpmess db ?,'$'
+notbarcursorposingame dw 0000h    
+notbarcursorposinmainmenu dw 0000h
 separatingline db '--------------------------------------------------------------------------------$'
-
+F1 equ 3bh ;scan code
+F2 equ 3Ch ;scan code
+F3 equ 3Dh ;scan code
+Escape equ 01h ;scan code 
+right equ 4Dh  ;scan code
+left  equ 4Bh  ;scan code
+up    equ 48h  ;scan code
+down  equ 50h  ;scan code
+shoot_Space equ 39h  ;scan code
+Enter equ 1Ch
+ChatByte equ 0CCh 
+GameByte equ 0aah
+ExitByte equ 0eeh 
+RChatinv db 0
+Rgameinv db 0
+Rexitinv db 0
 .code 
 main proc far 
     mov AX,@Data
@@ -141,54 +165,14 @@ main proc far
     PortIntialization 
     clearscreentm  
     Display  WelcomeMessage  
-    ReadNames              
-    
-;    endline 
-;    endline
-;    printstring Player1Name
-;    endline
-;    printstring Player2Name 
-;    hlt
-                
- 
-    mov BackToMainMenuFlag,0  
-                           
+    ReadNames
+SartingFromMainMenu:              
     clearscreentm
     Display WelcomeMessage
-    
-    xor bx,bx    
-    mov ah,2
-    mov dl,0
-    mov dh,14d
-    int 10h
-    Display Question1
-    xor bx,bx    
-    mov ah,2
-    mov dl,0
-    mov dh,16d
-    int 10h
-    Display Question2
-    xor bx,bx    
-    mov ah,2
-    mov dl,0
-    mov dh,18d
-    int 10h
-    Display Question3
-    
-    ;-------------------  
-    query: 
-    mov ah,0
-    int 16h  
-    cmp Ax,3C00H 
-    je chatmode
-    cmp Ax,011BH
-    je closeprogram
-    jmp playgame    
-    chatmode:
-    startchattm    
-              
-    jmp query 
-     ;---------------
+    DisplayQuestions                    
+    ProcessingAnswers
+	
+;---------
  
   playgame:  
 ;   mov ah,0
@@ -236,6 +220,9 @@ main proc far
 ;   jmp tankswar      
 closeprogram:
 
+mov dx,3fbh
+mov al,01000000b
+out dx,al 
 hlt
 main endp
   
