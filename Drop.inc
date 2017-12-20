@@ -1,11 +1,42 @@
 include CheckT1.inc
-
 include CheckT2.inc
 
 ;Drop
 Drop macro GiftsX,GiftsY,Tank1,Tank2
-local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop
+local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop,checks,placing,Position1,Position2,Position3,Position4
+local firstgift,secondgift,thirdgift,fourthgift,black,lightCyan,lightblue,start,maybeSecond,maybeThird,maybeFourth,DefinitelyFifth
+local label3,draw,label,label2,firstBlack,secondblack,thirdblack,FourthBlack,removeblack,imowner,firstbyteend,tryagain,tryagain1
+local secondbyteend,imowner2
 	pusha
+	
+	mov al,RGameinv
+    cmp al,0
+    je imowner
+    ;here iam not owner
+	tryagain1:
+	recive byte
+	mov al,byte
+	cmp al,iwillsendRandomTime
+	jne tryagain1
+	mov byte,oksendit
+	send byte
+	recive byte
+	mov al,byte
+	mov randomtime,al
+	jmp firstbyteend
+    imowner:
+    ;here i am owner
+		tryagain:	
+		mov al,iwillsendRandomTime
+		mov byte,al
+		send byte
+		recive byte
+		mov al,byte
+		cmp al,oksendit
+		jne tryagain
+    firstbyteend:                     
+	
+
 
  mov bx,offset GiftsX  
  mov Si,offset GiftsY
@@ -20,6 +51,18 @@ placing:
    int 21h
    pop ax
    and dh,00001111b
+
+	mov al,RGameinv
+	cmp al,0
+	je imowner2
+	;here iam not owner
+	mov dh,randomtime
+	jmp secondbyteend
+	imowner2:
+	;here i am owner 
+	mov byte,dh ;sending time
+	send byte
+	secondbyteend: 
    cmp dh,03d
    jbe position1
    cmp dh,07d
@@ -412,204 +455,6 @@ Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
 	mov [bx+30],11b
 	mov [bx+38],11b
 	jmp placing
-;/////////////////////////////
-   ;push ax
-   ;mov ah,2ch
-   ;int 21h
-   ;pop ax
-   ;and dh,00001111b
-   ;cmp dh,02d
-   ;jbe position1
-   ;cmp dh,05d
-   ;jbe position2
-   ;cmp dh,09d
-   ;jbe position3
-   ;jmp position2
-   ;;//////////////////////////////////////
-   ; position1:
-   ; mov bx,offset GiftsX  
-   ; mov Si,offset GiftsY  
-  ; 
-  ;  
-  ;  
-  ;  mov [bx],50d
-  ;  mov [bx+2],60d
-  ;  mov [bx+4],55d
-  ;  mov [bx+6],11b
-   ; 
-   ; 
-   ; mov [bx+8],500d
-   ; mov [bx+10],510d
-   ; mov [bx+12],505d
-   ; mov [bx+14],11b
-   ; 
-   ; mov [bx+16],50d
-   ; mov [bx+18],60d
-   ; mov [bx+20],55d
-   ; mov [bx+22],11b
-   ; 
-   ; mov [bx+24],500d
-   ; mov [bx+26],510d
-   ; mov [bx+28],505d
-   ; mov [bx+30],11b
-   ; 
-   ; mov [bx+32],20d
-   ; mov [bx+34],30d
-   ; mov [bx+36],25d
-   ; mov [bx+38],11b
-   ; 
-   ; 
-   ; 
-   ; mov [si],10d
-   ; mov [si+2],20d
-   ; mov [si+4],15d
-   ; mov [si+6],11b
-   ; 
-   ; 
-   ; mov [si+8],10d
-   ; mov [si+10],20d
-   ; mov [si+12],15d
-   ; mov [si+14],11b
-   ; 
-   ; 
-   ; mov [si+16],60d
-   ; mov [si+18],70d
-   ; mov [si+20],65d
-   ; mov [si+22],11b
-   ; 
-   ; mov [si+24],60d
-   ; mov [si+26],70d
-   ; mov [si+28],65d
-   ; mov [si+30],11b
-   ; 
-   ; mov [si+32],100d
-   ; mov [si+34],110d
-   ; mov [si+36],105d
-   ; mov [si+38],11b
-;	;
-;	
-;	jmp checks
-;   ; //////////////////////// 
-;   position2:
-;   mov bx,offset GiftsX  
-;    mov Si,offset GiftsY  
-;    mov [bx],10d
-;   mov [bx+2],20d
-;   mov [bx+4],15d
-;   mov [bx+6],11b
-;    
-;    
-;    mov [bx+8],620d
-;    mov [bx+10],630d
-;    mov [bx+12],625d
-;    mov [bx+14],11b
-;    
-;    mov [bx+16],315d
-;    mov [bx+18],325d
-;    mov [bx+20],320d
-;    mov [bx+22],11b
-;    
-;    mov [bx+24],315d
-;    mov [bx+26],325d
-;    mov [bx+28],320d
-;    mov [bx+30],11b
-;    
-;    mov [bx+32],315d
-;    mov [bx+34],325d
-;    mov [bx+36],320d
-;    mov [bx+38],11b
-;    
-;    
-;    
-;    mov [si],175d
-;    mov [si+2],185d
-;    mov [si+4],180d
-;    mov [si+6],11b
-;    
-;    
-;    mov [si+8],175d
-;    mov [si+10],185d
-;    mov [si+12],180d
-;    mov [si+14],11b
-;    
-;    
-;    mov [si+16],170d
-;    mov [si+18],180d
-;    mov [si+20],175d
-;    mov [si+22],11b
-;    
-;    mov [si+24],10d
-;    mov [si+26],20d
-;    mov [si+28],15d
-;    mov [si+30],11b
-;    
-;    mov [si+32],10d
-;    mov [si+34],20d
-;    mov [si+36],15d
-;    mov [si+38],11b 
-;	jmp checks
-;    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;    position3:
-;    mov bx,offset GiftsX  
-;    mov Si,offset GiftsY  	
-;    mov [bx],160d
-;    mov [bx+2],170d
-;    mov [bx+4],165d
-;    mov [bx+6],11b
-;    
-;    
-;    mov [bx+8],200d
-;    mov [bx+10],210d
-;    mov [bx+12],205d
-;    mov [bx+14],11b
-;    
-;    mov [bx+16],10d
-;    mov [bx+18],20d
-;    mov [bx+20],15d
-;    mov [bx+22],11b
-;    
-;    mov [bx+24],160d
-;    mov [bx+26],170d
-;    mov [bx+28],165d
-;    mov [bx+30],11b
-;    
-;    mov [bx+32],620d
-;    mov [bx+34],630d
-;    mov [bx+36],625d
-;    mov [bx+38],11b
-;    
-;    
-;    
-;    mov [si],170d
- ;   mov [si+2],180d
- ;   mov [si+4],175d
- ;   mov [si+6],11b
- ;   
- ;   
- ;   mov [si+8],170d
- ;   mov [si+10],180d
- ;   mov [si+12],175d
- ;   mov [si+14],11b
- ;   
- ;   
- ;   mov [si+16],10d
- ;   mov [si+18],20d
- ;   mov [si+20],15d
- ;   mov [si+22],11b
- ;   
- ;  mov [si+24],10d
- ;  mov [si+26],20d
- ;  mov [si+28],15d
- ;  mov [si+30],11b
- ;   
- ;   mov [si+32],10d
- ;   mov [si+34],20d
- ;   mov [si+36],15d
- ;   mov [si+38],11b     
- ;   jmp checks
-
-
-;//////////////////////////////////
 	start:
 	popa
 endm Drop

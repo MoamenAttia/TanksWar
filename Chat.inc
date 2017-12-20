@@ -100,17 +100,108 @@ StartChatTM macro
 	jmp SartingFromMainMenu
 endm StartChatTM
 
-; StartChatVM macro
-	; pusha
-	; clearscreenVM
-	; printstring player1name+2
-	; mov word ptr cursorpos,000bh
-	; movecursorshehab cursorpos
-	; printstring separatingline
-	; printstring player2name+2	
-	; mov word ptr cursorpos,0017h
-	; movecursorshehab cursorpos
-	; printstring separatingline
+SendChatVM macro
+local imowner,chatend,noXviolation,noXviolation2,breakchat
+	pusha
+	mov ah,0
+	int 16h
+	cmp ah,Enter_key
+	je breakchat
+	mov tmpmess,al
+	mov byte,al
+	send byte
+	mov al,RGameinv
+    cmp al,1
+	je imowner
+	movecursorshehab leftplayerchatingamepos
+	mov dx ,leftplayerchatingamepos
+	mov cx,leftplayerchatingamebound
+	cmp ch,dh
+	jne noXviolation
+	mov ax,0600h
+	mov bh,00h
+	mov cx,1b01h
+	mov dx,leftplayerchatingamebound
+	xchg dh,dl
+	int 10h
+	mov leftplayerchatingamepos,011bh
+ noXviolation: 
+	movecursorshehab leftplayerchatingamepos
+	printstring tmpmess
+	getcursorpos leftplayerchatingamepos
+    jmp chatend
+    imowner: 
+	movecursorshehab Rightplayerchatingamepos
+	mov dx ,Rightplayerchatingamepos
+	mov cx,Rightplayerchatingamebound
+	cmp ch,dh
+	jne noXviolation2
+	mov ax,0600h
+	mov bh,00h
+	mov cx,1b29h
+	mov dx,Rightplayerchatingamebound
+	xchg dh,dl
+	int 10h
+	mov Rightplayerchatingamepos,291bh
+ noXviolation2: 	
+	movecursorshehab Rightplayerchatingamepos
+	printstring tmpmess
+	getcursorpos Rightplayerchatingamepos
+	jmp chatend
+	breakchat:
+	mov imchating,0
+	mov al,chatbyte
+	mov byte,al
+	send byte
+	chatend:
+	popa
+endm SendChatVM
 
-	; popa
-; endm StartChatVM
+RecChatVM macro
+	pusha
+	local imowner,chatend,noXviolation,noXviolation2
+	mov tmpmess,ah
+	mov al,RGameinv
+    cmp al,0
+	je imowner
+    ;here iam not owner
+	movecursorshehab leftplayerchatingamepos
+	mov dx ,leftplayerchatingamepos
+	mov cx,leftplayerchatingamebound
+	cmp ch,dh
+	jne noXviolation2	
+	mov ax,0600h
+	mov bh,00h
+	mov cx,1b01h
+	mov dx,leftplayerchatingamebound
+	xchg dh,dl
+	int 10h
+	mov leftplayerchatingamepos,011bh
+ noXviolation2: 
+	movecursorshehab leftplayerchatingamepos
+	printstring tmpmess
+	getcursorpos leftplayerchatingamepos
+    jmp chatend
+    imowner:
+    ;here i am owner  
+	movecursorshehab Rightplayerchatingamepos
+	mov dx ,Rightplayerchatingamepos
+	mov cx,Rightplayerchatingamebound
+	cmp ch,dh
+	jne noXviolation
+	mov ax,0600h
+	mov bh,00h
+	mov cx,1b29h
+	mov dx,Rightplayerchatingamebound
+	xchg dh,dl
+	int 10h
+	mov Rightplayerchatingamepos,291bh
+ noXviolation: 
+	movecursorshehab Rightplayerchatingamepos
+	printstring tmpmess
+	getcursorpos Rightplayerchatingamepos
+  chatend:
+	popa
+endm RecChatVM
+
+

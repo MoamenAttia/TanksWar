@@ -4,10 +4,10 @@
 ;01 right
 ;10 left 
 ;80x25 char 640*480 px 16colors 
-;include newmap.inc   
+include newmap.inc   
 include Display.inc
-;include map2.inc
-;include ReloadLivesScore.inc
+include Map2.inc
+include ReloadLivesScore.inc
 include UpdateStatus.inc  
 include Chat.inc
 include Intialization.inc
@@ -18,7 +18,6 @@ include Intialization.inc
 .data 
 Byte db ?           
 Score db 'Score: $'            
-BackToMainMenuFlag db 0
 WelcomeMessage db 10,13,10,13,13,13
                db '  **         **  ********  **    ********* ******** ***           *** ********',10,13
                db '  **         **  **        **    ********* *      * ** *        *  ** **' ,10,13
@@ -31,9 +30,11 @@ SecondNameLastLife db 7d
 FirstNameLastBullets db 5d
 SecondNameLastBullets db 5d
 FirstNameLastScore db 0
-SecondNameLastScore db 0
+SecondNameLastScore db 0  
 
-              
+
+lvlselectionmess db 'Please select lvl!',10,10,'    1.Press 1 for lvl1',10,'    2.Press 2 for lvl2$' 
+chosenlvlselectionmess db 'The selected lvl is lvl$' 
 Lives      db 'Lives: $'
 Bullets    db 'Bullets: $'
 
@@ -41,7 +42,7 @@ Question1 db '                           *To start chatting press F1',10,13,'$'
 Question2 db '                           *To start TanksWar game press F2',10,13,'$'
 Question3 db '                           *To end the program press ESC$'
                       
-BackToMainMenu db '-If you want to return back to Main Menu or restart the game press F4$'
+BackToMainMenuMess db '-If you want to return back to Main Menu or restart the game press F4$'
 
 PlayerMessage db 10,13,10,13,10,13
                    db '         Please enter your name :',10,13,'                     $'  
@@ -51,9 +52,8 @@ GameInvitationMessage db '- You Sent a Game Invitation To $'
 ReplyingToChatInvitationMessage db ' sent you a Chat invitation, to accept press f1$' 
 ReplyingToGameInvitationMessage db ' sent you a Game invitation, to accept press f2$'
 ExitProgramMess db 'Program is exited!!!$'
-
-guest db 'Guest: $'
-Host db 'Host: $' 
+WinnerMess db 'Winner$'
+LoserMess db 'Loser$'
              
 InDATA db 15,?,16 dup('$')
 Player1Name db 16 dup('$')
@@ -64,11 +64,10 @@ Player2Name db 16 dup('$')
 Player2mess db ?,'$' 
 Player2CursorPos dw 0000h    
 
-Winner db 'The Winner is : $' 
 DrawResult db 'Game is Draw$'
 EndChatMess db 'Press f3 to end chat with $'     
 EnterNameMess db '         Press enter to conitinue $'
-line label byte
+
 StartPointX dw ,?
 StartPointY dw ,?
 EndPointX   dw ,?
@@ -89,7 +88,7 @@ lengtha dw 40d
 lengtha1 dw ?  
 lengtha2 dw ?       
 
-tank2 dw 598,317d,638d,377d,638d,417d,598d,417d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 618d,397d ,0710h
+tank2 dw 598d,317d,638d,377d,638d,417d,598d,417d,  90d,220d,110d,220d,110d,240d,90d,240d, 95d,215d,105d,215d,105d,220d,95d,220d, 618d,397d ,0710h
 
 shots2 dw 5d,0d 
 dw 0,0,0
@@ -143,20 +142,41 @@ notbarcursorposinmainmenu dw 0000h
 separatingline db '--------------------------------------------------------------------------------$'
 F1 equ 3bh ;scan code
 F2 equ 3Ch ;scan code
-F3 equ 3Dh ;scan code
+F3 equ 3dh ;scan code 
+F4 equ 3eh ;scan code
 Escape equ 01h ;scan code 
 right equ 4Dh  ;scan code
 left  equ 4Bh  ;scan code
 up    equ 48h  ;scan code
 down  equ 50h  ;scan code
 shoot_Space equ 39h  ;scan code
-Enter equ 1Ch
+Enter_key equ 1Ch   ;scan code
+one equ 02h ;scan code
+two equ 03h ;scan code
 ChatByte equ 0CCh 
 GameByte equ 0aah
-ExitByte equ 0eeh 
+ExitByte equ 0eeh  
+iwillsendRandomTime equ 0bbh
+oksendit equ   0ffh
+randomtime db 0   
+
+
 RChatinv db 0
 Rgameinv db 0
 Rexitinv db 0
+RChatInGame db 0 
+whichlvl db 0  
+notificationbaringame dw 011Dh 
+                                    
+mychatposingame  dw 0000h
+hischatposingame dw 0000h 
+leftplayerchatingamepos dw 011bh  
+leftplayerchatingamebound dw 201bh 
+ 
+rightplayerchatingamepos dw 291bh
+rightplayerchatingamebound dw 491bh 
+imchating db 0
+
 .code 
 main proc far 
     mov AX,@Data
@@ -166,140 +186,219 @@ main proc far
     clearscreentm  
     Display  WelcomeMessage  
     ReadNames
-SartingFromMainMenu:              
+SartingFromMainMenu:
+DataIntialization 
+ 
+    mov ah,0          
+    mov al,03h
+    int 10h            
     clearscreentm
     Display WelcomeMessage
     DisplayQuestions                    
     ProcessingAnswers
 	
 ;---------
- 
-  playgame:  
-;   mov ah,0
-;   mov al,12h
-;   int 10h
-;   DataIntialization 
-;                                
-;   SetMap
-;   
-;   MoveCursor 1,23d
-;   Display Host
-;   Display Player1Name
-;
-;   MoveCursor 41d,23d
-;   Display Guest                       
-;   Display Player2Name
-;
-;   MoveCursor 1d,29d
-;   Display BackToMainMenu
-;   
-;   MoveCursor 1,25d  
-;   Display Bullets
-;   mov cx,5
-;   mov ah,9 	;Display
-;   mov bh,0 	;Page 0
-;   mov al,0FEH  ;Letter D
-;   mov bl,0Ah ;Green (A) on white(F) background
-;   int 10h            
-;           
-;   MoveCursor 41d,25d    
-;   Display Bullets
-;   mov cx,5
-;   mov ah,9 	;Display
-;   mov bh,0 	;Page 0
-;   mov al,0FEH  ;Letter D
-;   mov bl,0Ah ;Green (A) on white(F) background
-;   int 10h            
-;                   
-;  
-;              
-;
-;   tankswar:     
-;     call input_and_flowcontrol    
-;     UpdateStatus
-;   jmp tankswar      
+                         
+                         
+  playgame:   
+   clearscreenvm
+
+   mov al,whichlvl 
+   cmp al,1
+   jne notlvl1     
+        SetMap 
+        jmp maplvldone
+   notlvl1:  
+        SetMap2  
+    jmp maplvldone                               
+   maplvldone:
+   
+   
+   
+    mov al,RGameinv
+    cmp al,0
+    je imowner1
+    ;here iam not owner
+    MoveCursor 41d,23d
+    jmp cursorend1
+    imowner1:
+    ;here i am owner       
+    MoveCursor 1,23d      
+    cursorend1:
+   Display Player1Name
+   
+    mov al,RGameinv
+    cmp al,0
+    je imowner2
+    ;here iam not owner
+     MoveCursor 1,23d
+    jmp cursorend2
+    imowner2:
+    ;here i am owner           
+    MoveCursor 41d,23d
+    cursorend2:                     
+   Display Player2Name 
+   
+   ;--------
+   MoveCursor 1d,29d
+   Display BackToMainMenuMess 
+   ;--------
+   
+    mov al,RGameinv
+    cmp al,0
+    je imowner3
+    ;here iam not owner
+    MoveCursor 41d,25d
+    jmp cursorend3
+    imowner3:
+    ;here i am owner       
+    MoveCursor 1,25d 
+    cursorend3:
+    
+   Display Bullets
+   mov cx,5
+   mov ah,9 	;Display
+   mov bh,0 	;Page 0
+   mov al,0FEH  ;Letter D
+   mov bl,0Ah ;Green (A) on white(F) background
+   int 10h   
+   
+   
+    mov al,RGameinv
+    cmp al,0
+    je imowner4
+    ;here iam not owner
+    MoveCursor 1,25d
+    jmp cursorend4
+    imowner4:
+    ;here i am owner       
+     MoveCursor 41d,25d  
+    cursorend4:         
+             
+      
+   Display Bullets
+   mov cx,5
+   mov ah,9 	;Display
+   mov bh,0 	;Page 0
+   mov al,0FEH  ;Letter D
+   mov bl,0Ah ;Green (A) on white(F) background
+   int 10h            
+                            
+
+   tankswar:     
+     call input_and_flowcontrol    
+     UpdateStatus
+   jmp tankswar      
 closeprogram:
 
 mov dx,3fbh
 mov al,01000000b
 out dx,al 
 hlt
-main endp
-  
-input_and_flowcontrol proc near 
-    pusha 
-  ;  Drop GiftsX,GiftsY,tank1,tank2 
+main endp 
+
+input_and_flowcontrol proc near
+    pusha   
+    
+    drawframe     
+  ;  mov al,RGameinv
+;    cmp al,0
+;    je imowner5
+;    
+   ; mov al,whichlvl 
+   ; cmp al,1
+   ; jne notlvl111     
+         ; Drop GiftsX,GiftsY,tank2,tank1
+   ; notlvl111:                                      
+    ; jmp Dropend
+    ; imowner5: 
+    
+   ; mov al,whichlvl 
+   ; cmp al,1
+   ; jne notlvl1111     
+         ; Drop GiftsX,GiftsY,tank1,tank2
+   ; notlvl1111:                                
+   ; maplvldonee:
+          
+    ; Dropend:
+    
   
     mov ah,1d
     int 16h 
-    jnz con
-     
-    jmp already_comsumed 
-    con:
-    cmp ah,1ch
-    jnz noshoot_user1
-        mov bx, offset shots1
-        mov di, offset tank1
-        call inputshots
-        jmp already_comsumed    
-    noshoot_user1: 
+    jnz con  
+    jmp remotebuffer 
+    con:                                  
+    ;check if f444444444444444444444444444
+    cmp ah,f4
+    jne notf4
+        mov ah,0d
+        int 16h     
+        mov al,ExitByte
+        mov byte,al  
+        send byte  
+        endgamewithscore
+    notf4:
+    ;check if enterrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr 
     
-    cmp ah,57d  
-    jnz noshoot_user2
-        mov bx, offset shots2
-        mov di, offset tank2
-        call inputshots
-        jmp already_comsumed   
-    noshoot_user2:
+    mov cl,imchating
+    cmp cl,1 
+    je chating
     
+    cmp ah,Enter_key
+    jne notenterpress
+        mov imchating ,1 
+        mov ah,0d
+        int 16h    
+        mov al,chatbyte
+        mov byte,al
+        send byte
+        chating:
+        SendChatVM 
+        jmp remotebuffer 
+    notenterpress:
 
-                   
-    cmp ah,4Dh
-    jz moveuser1 
+    cmp ah,shoot_Space
+    jnz noshoot
+        mov al,RGameinv
+        cmp al,0
+        je imowner6         
+        mov bx, offset shots2
+        mov di, offset tank2     
+        jmp shootend
+        imowner6:
+        mov bx, offset shots1
+        mov di, offset tank1             
+        shootend: 
+        mov ah,0d
+        int 16h                     
+        call inputshots            
+        mov byte,ah 
+        send byte          
+        jmp remotebuffer    
+    noshoot: 
+               
+    cmp ah,right  
+    jz moveuser  
+    cmp ah,left
+    jz moveuser 
+    cmp ah,up
+    jz moveuser
+    cmp ah,down
+    jz moveuser
+                    
+    jmp no_move_user    
+    moveuser: 
+      
+   
     
-    cmp ah,48h
-    jz moveuser1 
-    
-    cmp ah,50h
-    jz moveuser1
-    
-    cmp ah,4Bh
-    jz moveuser1
-                
-    jmp no_move_user1    
-    moveuser1:   
-     call tank_control  
-     ;reset centre 
-    mov ax,lengtha
-    mov dl,2
-    div dl
-    mov bx,tank1
-    add bx,ax
-    mov tank1+48,bx
-    mov bx,tank1+2
-    add bx,ax
-    mov tank1+50,bx
-     jmp already_comsumed        
-    no_move_user1:  
-                        
-                       
-                        
-    cmp ah,11h
-    jz moveuser2 
-    
-    cmp ah,1fh
-    jz moveuser2 
-    
-    cmp ah,20h
-    jz moveuser2
-    
-    cmp ah,1Eh
-    jz moveuser2
-                
-    jmp no_move_user2    
-    moveuser2:   
-      call tank_control
-      ;reset centre 
+    mov al,RGameinv
+    cmp al,0   
+    push ax
+    je imowner7
+    mov ah,0d
+    int 16h      
+    call tank_control_2
+    ;reset centre 
     mov ax,lengthb
     mov dl,2
     div dl
@@ -309,31 +408,139 @@ input_and_flowcontrol proc near
     mov bx,tank2+2
     add bx,ax
     mov tank2+50,bx 
-     jmp already_comsumed
-            
-    no_move_user2:  
-    
-    
-    cmp ah,01h
-    jnz donot_end
-    hlt
-    donot_end:
-    
-    mov ah,0h
-    int 16h
-    already_comsumed:   
+    jmp moveend
+    imowner7: 
+    mov ah,0d
+    int 16h    
+    call tank_control_1
+    ;reset centre 
+    mov ax,lengtha
+    mov dl,2
+    div dl
+    mov bx,tank1
+    add bx,ax
+    mov tank1+48,bx
+    mov bx,tank1+2
+    add bx,ax
+    mov tank1+50,bx        
+    moveend:  
+    pop ax
+    mov byte,ah 
+    send byte              
+    jmp remotebuffer        
+    no_move_user:  
+                        
+remotebuffer:
+
+	mov dx,3fdh
+	in al,dx
+	and al,00000001b
+	jz nothingrecived
+	mov dx,3f8h
+	in al,dx     
+	mov ah,al  
+    cmp ah,chatbyte
+    jne notchatbyte
+        mov al,rchatingame
+        cmp al,1   
+        je one_label 
+           mov rchatingame,1 
+           jmp nothingrecived ; chat byte wonot be used now          
+        one_label: 
+           mov rchatingame,0 
+           jmp nothingrecived
+    notchatbyte:
+     mov al,rchatingame
+     cmp al,1 
+     je chatingame  
+     
+     
+    ;chec exitttttttttttttttttttttttttttttttttttttttttt 
+    ;cehck if chaaaaaaaaaaaat byte and RChatInGame Flag 
+    cmp ah,exitbyte
+    jne notexitbyte 
+        mov byte,ah
+        send byte  
+        endgamewithscore
+    notexitbyte:
+                 
+    cmp ah,shoot_Space
+    jnz noshoot_
+        mov al,RGameinv
+        cmp al,1
+        je imowner8 
+        mov bx, offset shots2
+        mov di, offset tank2     
+        jmp shootend_
+        imowner8:
+        mov bx, offset shots1
+        mov di, offset tank1             
+        shootend_:             
+        call inputshots                     
+        jmp nothingrecived    
+    noshoot_: 
+               
+    cmp ah,right  
+    jz moveuser_  
+    cmp ah,left
+    jz moveuser_ 
+    cmp ah,up
+    jz moveuser_
+    cmp ah,down
+    jz moveuser_
+                    
+    jmp no_move_user_    
+    moveuser_:    
+    mov al,RGameinv
+    cmp al,1
+    je imowner9  
+    call tank_control_2 
+    ;reset centre 
+    mov ax,lengthb
+    mov dl,2
+    div dl
+    mov bx,tank2
+    add bx,ax
+    mov tank2+48,bx
+    mov bx,tank2+2
+    add bx,ax
+    mov tank2+50,bx 
+    jmp moveend_
+    imowner9:  
+    call tank_control_1
+    ;reset centre 
+    mov ax,lengtha
+    mov dl,2
+    div dl
+    mov bx,tank1
+    add bx,ax
+    mov tank1+48,bx
+    mov bx,tank1+2
+    add bx,ax
+    mov tank1+50,bx        
+    moveend_:                           
+    no_move_user_:
+    jmp nothingrecived
+    chatingame:  
+    RecChatVM  
+nothingrecived:
+    ;if entered bad key 
+    mov ah,1d
+    int 16h 
+    jz connnnn  
+        mov ah,0h
+        int 16h
+    connnnn: 
+    ;-----------
       
     call calc_centre
     call calc_square
-    
     ;------------ 
     call tanka
     call draw_tank
     call tankb
     call draw_tank 
-    
-    
-    ;-----------
+    ;-------------
     mov bx, offset shots2
     mov di, offset tank1    
     call process_shots
@@ -356,11 +563,12 @@ input_and_flowcontrol proc near
     call moveshots ;mov shots and clear old shots the from screen 
     mov bx, offset shots2
     add bx,4    
-    call moveshots ;mov shots and clear old shots the from screen
-     
+    call moveshots ;mov shots and clear old shots the from screen    
+    
     popa
     ret
-input_and_flowcontrol endp
+input_and_flowcontrol endp    
+  
 
 
 
@@ -374,7 +582,8 @@ DrawLine proc near
     mov cx,StartPointX 	;Column
     mov dx,StartPointY 	;Row
     mov al,linecolor  		;Pixel color
-    mov ah,0ch  		;Draw Pixel Command
+    mov ah,0ch  		;Draw Pixel Command 
+    mov bh,0
     looop1: int 10h
     	 inc cx
     	 cmp cx,EndPointX
@@ -386,12 +595,13 @@ DrawLine proc near
     mov cx,StartPointX 	;Column
     mov dx,StartPointY 	;Row
     mov al,linecolor  		;Pixel color
-    mov ah,0ch  		;Draw Pixel Command
+    mov ah,0ch  		;Draw Pixel Command 
+    mov bh,0
     looop2: int 10h
 	 inc dx
 	 cmp dx,EndPointY
 	 jnz looop2 
-	
+
     popa
     ret
 Drawline endp 
@@ -412,32 +622,14 @@ drawpx endp
 
 inputshots proc near
     pusha 
-    ;i here interset in shoot only  
-;    mov ah,1d
-;    int 16h 
-;    jnz con
-;    popa
-;    ret
-;    con: 
-;    cmp ah,57d     
-;    jz con2
-;    popa
-;    ret
-;    con2:
-;         
-
+    ;i here interset in shoot only       
     mov si ,[bx]
     mov ax ,[bx]+2
-    cmp si ,ax
-    jnz con3
-    mov ah,0
-    int 16h   
+    cmp si ,ax 
+    jnz con3 
     popa
     ret
-    con3:
-    
-    mov ah,0
-    int 16h
+    con3: 
     ;-----------
     mov ax,[bx]+2
     mov cl,6 
@@ -846,8 +1038,7 @@ process_shots endp
 
 moveshots proc near
     pusha  
-    
-    
+
     mov cx,[bx]-2
     cmp cx,0
     jnz moveshotsloop
@@ -1137,7 +1328,7 @@ damagewall proc near
 damagewall endp
 
  
- calc_tank1 proc 
+ calc_tank1 proc near
     pusha           
    ;move values from temp values to permanent variables 
     mov ax,length
@@ -1174,7 +1365,7 @@ damagewall endp
     ret
 calc_tank1 endp                  
 
-calc_tank2 proc 
+calc_tank2 proc near
     pusha 
     ;move values from temp values to permanent variables   
     mov ax,length
@@ -1210,7 +1401,7 @@ calc_tank2 proc
     ret
 calc_tank2 endp    
 
-calc_centre proc 
+calc_centre proc  near
     pusha
     mov ax,lengtha
     mov dl,2
@@ -1238,7 +1429,7 @@ calc_centre proc
     ret
 calc_centre endp    
 
-calc_square proc
+calc_square proc  near
     pusha
     mov ax,lengtha   
     mov lengthb,ax
@@ -1269,7 +1460,7 @@ calc_square proc
     popa            
     ret
 calc_square endp
-calc_length    proc  
+calc_length proc near 
     ;calc smaller lengths
     pusha 
     mov ax,length
@@ -1289,7 +1480,7 @@ calc_length    proc
 calc_length endp  
 
 
-calc_points_up proc 
+calc_points_up proc near 
     pusha 
     mov bx,length
     add bx,startr
@@ -1337,7 +1528,7 @@ calc_points_up proc
 calc_points_up endp   
     
 
-calc_points_down proc
+calc_points_down proc near
     pusha  
     mov bx,length
     add bx,startr
@@ -1387,7 +1578,7 @@ calc_points_down endp
         
 
 
-calc_points_right proc
+calc_points_right proc near
     pusha  
     mov bx,length
     add bx,startc
@@ -1435,7 +1626,7 @@ calc_points_right proc
     ret
 calc_points_right endp
 
-calc_points_left proc
+calc_points_left proc near
     pusha  
     mov bx,length
     add bx,startc
@@ -1480,7 +1671,7 @@ calc_points_left proc
     ret
 calc_points_left endp 
 
-draw_vertical_line proc
+draw_vertical_line proc near
     pusha        
     loopa:
     push cx
@@ -1496,7 +1687,7 @@ draw_vertical_line proc
     ret
 draw_vertical_line endp
 
-draw_horizontal_line proc        
+draw_horizontal_line proc  near      
     pusha
     loopb:
     push cx
@@ -1512,7 +1703,7 @@ draw_horizontal_line proc
     ret
 draw_horizontal_line endp
 
-tanka proc 
+tanka proc  near
     pusha
     mov ax,lengtha
     mov bx,tank1+2
@@ -1541,7 +1732,7 @@ tanka proc
     ret
 tanka endp         
 
-tankb proc  
+tankb proc near 
     pusha
     mov ax,lengthb
     mov bx,tank2+2
@@ -1570,7 +1761,7 @@ tankb proc
     ret
 tankb endp
 
-draw_tank proc 
+draw_tank proc near
     pusha 
     mov cx,length    
     mov si,startc
@@ -1689,7 +1880,7 @@ draw_tank proc
     ret 
 draw_tank endp 
 
-clear_tank proc
+clear_tank proc  near
     pusha 
     mov color1,0
     call draw_tank     
@@ -1700,7 +1891,7 @@ clear_tank endp
                        
              
 
-check_up proc 
+check_up proc  near
     pusha     
     mov di,startc
     mov ax,length  
@@ -1735,18 +1926,18 @@ check_up proc
     inc di
     dec temp_var
     jnz loopout1     
-    mov coll_detect,0   
+    mov word ptr coll_detect,0   
     popa
     ret
     collup:  
     pop temp_var 
-    mov coll_detect,1 
+    mov word ptr coll_detect,1 
     popa      
 ret
 check_up endp                 
 
 
-check_down proc 
+check_down proc near
     pusha  
     mov di,startc
     mov ax,length  
@@ -1782,19 +1973,19 @@ check_down proc
     inc di
     dec temp_var
     jnz loopout2     
-    mov coll_detect,0   
+    mov word ptr coll_detect,0   
     popa
     ret
     colldown:    
     pop temp_var      
-    mov coll_detect,1 
+    mov word ptr coll_detect,1 
     popa      
 ret
 check_down endp 
 
 
 
-check_right proc 
+check_right proc  near
     pusha 
     mov si,startr    
     mov ax,length  
@@ -1830,18 +2021,18 @@ check_right proc
     inc si
     dec temp_var
     jnz loopout3     
-    mov coll_detect,0   
+    mov word ptr coll_detect,0   
     popa
     ret
     collright:      
     pop temp_var
-    mov coll_detect,1 
+    mov word ptr coll_detect,1 
     popa      
 ret
-check_right endp      
+check_right endp    
 
 
-check_left proc 
+check_left proc  near
     pusha  
     mov si,startr
     mov ax,length  
@@ -1876,18 +2067,18 @@ check_left proc
     inc si
     dec temp_var
     jnz loopout4     
-    mov coll_detect,0   
+    mov word ptr coll_detect,0   
     popa
     ret
     collleft:           
     pop temp_var    
-    mov coll_detect,1 
+    mov word ptr coll_detect,1 
     popa      
 ret
 check_left endp
 
 
-move_up1 proc  
+move_up1 proc   near
     pusha
     call tanka
     call clear_tank 
@@ -1897,7 +2088,7 @@ move_up1 proc
     sub tank1+2,ax 
     call tanka   
     call check_up 
-    cmp coll_detect,1
+    cmp word ptr coll_detect,1
     jz col1   
     mov ax,0
     jmp conti1
@@ -1905,7 +2096,7 @@ move_up1 proc
     mov ax,step 
     add tank1+2,ax
     conti1: 
-    mov coll_detect,0 
+    mov word ptr coll_detect,0 
     ;orientation up  
     mov ax,tank1+52
     and ax,0fff0h
@@ -1919,7 +2110,7 @@ move_up1 proc
     ret          
 move_up1 endp 
 
-move_down1 proc
+move_down1 proc  near
     pusha
     call tanka
     call clear_tank
@@ -1937,7 +2128,7 @@ move_down1 proc
     mov ax,step 
     sub tank1+2,ax
     conti2:   
-    mov coll_detect,0
+    mov word ptr  coll_detect,0
     mov ax,tank1+52 
     and ax,0fff0h
     or  ax,0003H
@@ -1950,7 +2141,7 @@ move_down1 proc
     ret    
 move_down1 endp
 
-move_right1 proc 
+move_right1 proc near 
     pusha   
     call tanka
     call clear_tank
@@ -1968,7 +2159,7 @@ move_right1 proc
     mov ax,step 
     sub tank1,ax
     conti3:         
-    mov coll_detect,0
+    mov word ptr  coll_detect,0
     mov ax,tank1+52
     and ax,0fff0h
     or  ax,0001H
@@ -1981,7 +2172,7 @@ move_right1 proc
     ret    
 move_right1 endp
 
-move_left1 proc
+move_left1 proc   near
     pusha     
     call tanka
     call clear_tank 
@@ -1999,7 +2190,7 @@ move_left1 proc
     mov ax,step 
     add tank1,ax
     conti4:           
-    mov coll_detect,0  
+    mov word ptr  coll_detect,0  
     mov ax,tank1+52 
     and ax,0fff0h
     or  ax,0002H
@@ -2012,7 +2203,7 @@ move_left1 proc
     ret    
 move_left1 endp
 
-move_up2 proc
+move_up2 proc near
     pusha
     call tankb
     call clear_tank 
@@ -2030,7 +2221,7 @@ move_up2 proc
     mov ax,step
     add tank2+2,ax
     conti5: 
-    mov coll_detect,0  
+    mov word ptr  coll_detect,0  
     mov ax,tank2+52
     and ax,0fff0h
     or ax,0000H
@@ -2043,7 +2234,7 @@ move_up2 proc
     ret    
 move_up2 endp 
 
-move_down2 proc
+move_down2 proc near
     pusha
     call tankb
     call clear_tank
@@ -2061,7 +2252,7 @@ move_down2 proc
     mov ax,step 
     sub tank2+2,ax
     conti6:   
-    mov coll_detect,0
+    mov word ptr  coll_detect,0
     mov ax,tank2+52
     and ax,0fff0h
     or ax,0003H
@@ -2074,7 +2265,7 @@ move_down2 proc
     ret    
 move_down2 endp
 
-move_right2 proc
+move_right2 proc near
     pusha
     call tankb
     call clear_tank
@@ -2092,7 +2283,7 @@ move_right2 proc
     mov ax,step 
     sub tank2,ax
     conti7:   
-    mov coll_detect,0
+    mov word ptr  coll_detect,0
     mov ax,tank2+52
     and ax,0fff0h
     or  ax,0001H
@@ -2105,7 +2296,7 @@ move_right2 proc
     ret    
 move_right2 endp
 
-move_left2 proc
+move_left2 proc near
     pusha 
     call tankb
     call clear_tank 
@@ -2123,7 +2314,7 @@ move_left2 proc
     mov ax,step
     add tank2,ax
     conti8:   
-    mov coll_detect,0
+    mov word ptr  coll_detect,0
     mov ax,tank2+52
     and ax,0fff0h
     or  ax,0002H
@@ -2135,6 +2326,74 @@ move_left2 proc
     popa
     ret    
 move_left2 endp    
+
+                       
+             
+tank_control_2 proc near
+    pusha      
+    cmp ah,48h
+    jz up2  
+    cmp ah,50h
+    jz down2
+    cmp ah,4Dh
+    jz right2
+    cmp ah,4Bh
+    jz left2
+    
+    up2:
+    call move_up2
+    jmp walk      
+    
+    down2:
+    call move_down2
+    jmp walk
+    
+    right2:
+    call move_right2
+    jmp walk
+    
+    left2:
+    call move_left2
+    jmp walk
+        
+    walk:
+    popa
+    ret
+tank_control_2 endp                           
+
+
+
+tank_control_1 proc near
+    pusha      
+    cmp ah,48h
+    jz up1  
+    cmp ah,50h
+    jz down1
+    cmp ah,4Dh
+    jz right1
+    cmp ah,4Bh
+    jz left1
+
+    up1:
+    call move_up1
+    jmp walkk      
+    
+    down1:
+    call move_down1
+    jmp walkk
+    
+    right1:
+    call move_right1
+    jmp walkk
+    
+    left1:
+    call move_left1
+    jmp walkk      
+  
+    walkk:
+    popa
+    ret
+tank_control_1 endp 
 
 ;check_tank_collision proc 
 ;    mov ax,tank1
@@ -2176,76 +2435,7 @@ move_left2 endp
 ;    ret
 ; 
 ;check_tank_collision endp
-;                          
-             
-                          
-
-    
-                                               
-
-
-tank_control proc
-    pusha      
- 
-    mov ah,0
-    int 16h
-    cmp ah,48h
-    jz up1  
-    cmp ah,50h
-    jz down1
-    cmp ah,4Dh
-    jz right1
-    cmp ah,4Bh
-    jz left1
-      
-    
-    cmp ah,11h
-    jz up2  
-    cmp ah,1fh
-    jz down2
-    cmp ah,20h
-    jz right2
-    cmp ah,1Eh
-    jz left2  
-    
-    up1:
-    call move_up1
-    jmp walk      
-    
-    down1:
-    call move_down1
-    jmp walk
-    
-    right1:
-    call move_right1
-    jmp walk
-    
-    left1:
-    call move_left1
-    jmp walk      
-    
-    up2:
-    call move_up2
-    jmp walk      
-    
-    down2:
-    call move_down2
-    jmp walk
-    
-    right2:
-    call move_right2
-    jmp walk
-    
-    left2:
-    call move_left2
-    jmp walk
-        
-    walk:
-    popa
-    ret
-tank_control endp 
-
-
+;   
 
 end main
                                  

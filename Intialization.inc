@@ -18,78 +18,172 @@ PortIntialization macro
 	popa
 endm PortIntialization
 
-DataIntialization macro 
-   call calc_square 
-   call calc_centre
+DataIntialization macro
+	pusha
+	local nothingrecived1,clear
+	
+	mov FirstNameLastLife,7d
+	mov SecondNameLastLife,7d
+	mov FirstNameLastBullets,5d
+	mov SecondNameLastBullets,5d
+	mov FirstNameLastScore,0d
+	mov SecondNameLastScore,0d
+	mov whichlvl,0d
+	mov word ptr coll_detect,0
+	
+	   
+	mov RChatinv,0
+	mov Rgameinv,0
+	mov Rexitinv,0
+	mov RChatInGame,0
+	mov imchating,0
+	
+	clear:
+	mov dx,3fdh
+	in al,dx
+	and al,00000001b
+	jz nothingrecived1
+	mov dx,3f8h
+	in al,dx 
+	jmp clear
+	nothingrecived1:
+
+	
+	mov word ptr tank1  , 2d
+	mov word ptr tank1+2, 2d
+	mov word ptr tank1+16, 12d
+	mov word ptr tank1+18, 6d
+	mov word ptr tank1+32, 45d
+	mov word ptr tank1+34, 115d
+	mov word ptr tank1+48 ,22d
+	mov word ptr tank1+50 ,22d
+	mov word ptr tank1+52 ,0712h
+	mov word ptr shots1+2,0d
+	
+	mov word ptr tank2  , 598d
+	mov word ptr tank2+2, 317d
+	
+	mov word ptr tank2+16, 90d
+	mov word ptr tank2+18, 220d
+	mov word ptr tank2+32, 95d
+	mov word ptr tank2+34, 215d
+	
+	mov word ptr tank2+48 ,618d
+	mov word ptr tank2+50 ,397d
+	mov word ptr tank2+52 ,0712h
+	mov word ptr shots2+2,0d
+	
+	mov word ptr coll_detect,0d
+
+	mov bx,offset GiftsX  
+	mov Si,offset GiftsY  
+
+	mov word ptr [bx],75d
+	mov word ptr [bx+2],85d
+	mov word ptr [bx+4],80d
+	mov word ptr [bx+6],11b
+
+
+	mov word ptr [bx+8],555d
+	mov word ptr [bx+10],565d
+	mov word ptr [bx+12],560d
+	mov word ptr [bx+14],11b
+
+	mov word ptr [bx+16],315d
+	mov word ptr [bx+18],325d
+	mov word ptr [bx+20],320d
+	mov word ptr [bx+22],11b
+
+	mov word ptr [bx+24],315d
+	mov word ptr [bx+26],325d
+	mov word ptr [bx+28],320d
+	mov word ptr [bx+30],11b
+
+	mov word ptr [bx+32],315d
+	mov word ptr [bx+34],325d
+	mov word ptr [bx+36],320d
+	mov word ptr [bx+38],11b
+
+
+	mov word ptr [si],175d
+	mov word ptr [si+2],185d
+	mov word ptr [si+4],180d
+	mov word ptr [si+6],11b 
+
+	mov word ptr [si+8],175d
+	mov word ptr [si+10],185d
+	mov word ptr [si+12],180d
+	mov word ptr [si+14],11b	
+	 
+	mov word ptr [si+16],170d
+	mov word ptr [si+18],180d
+	mov word ptr [si+20],175d
+	mov word ptr [si+22],11b
+
+	mov word ptr [si+24],50d
+	mov word ptr [si+26],60d
+	mov word ptr [si+28],55d
+	mov word ptr [si+30],11b
+
+	mov word ptr [si+32],305d
+	mov word ptr [si+34],315d
+	mov word ptr [si+36],310d
+	mov word ptr [si+38],11b  
+	
+	;---------------- 
+    ;drawing tanks  
+    call calc_centre
+    call calc_square
 ;----------------
-   mov bx,offset GiftsX  
-   mov Si,offset GiftsY  
-    
-   mov word ptr [bx],75d
-   mov word ptr [bx+2],85d
-   mov word ptr [bx+4],80d
-   mov word ptr [bx+6],11b
-   
-   
-   mov word ptr [bx+8],555d
-   mov word ptr [bx+10],565d
-   mov word ptr [bx+12],560d
-   mov word ptr [bx+14],11b
-   
-   mov word ptr [bx+16],315d
-   mov word ptr [bx+18],325d
-   mov word ptr [bx+20],320d
-   mov word ptr [bx+22],11b
-   
-   mov word ptr [bx+24],315d
-   mov word ptr [bx+26],325d
-   mov word ptr [bx+28],320d
-   mov word ptr [bx+30],11b
-   
-   mov word ptr [bx+32],315d
-   mov word ptr [bx+34],325d
-   mov word ptr [bx+36],320d
-   mov word ptr [bx+38],11b
-   
-    
-   mov word ptr [si],175d
-   mov word ptr [si+2],185d
-   mov word ptr [si+4],180d
-   mov word ptr [si+6],11b 
-    
-   mov word ptr [si+8],175d
-   mov word ptr [si+10],185d
-   mov word ptr [si+12],180d
-   mov word ptr [si+14],11b
-     
-   mov word ptr [si+16],170d
-   mov word ptr [si+18],180d
-   mov word ptr [si+20],175d
-   mov word ptr [si+22],11b
-    
-   mov word ptr [si+24],50d
-   mov word ptr [si+26],60d
-   mov word ptr [si+28],55d
-   mov word ptr [si+30],11b
-  
-   mov word ptr [si+32],305d
-   mov word ptr [si+34],315d
-   mov word ptr [si+36],310d
-   mov word ptr [si+38],11b   
-   ;---------------- 
-   ;----------------
-   call tanka
-   call calc_length
-   call calc_points_down
-   call calc_tank1  
-   ;----------------   
-   call tankb
-   call calc_length
-   call calc_points_up
-   call calc_tank2
-   ;----------------   
-   call tanka
-   call draw_tank
-   call tankb
-   call draw_tank 
+
+;----------------
+    call tanka
+    call calc_length
+    call calc_points_down
+    call calc_tank1  
+    ;----------------   
+    call tankb
+    call calc_length
+    call calc_points_up
+    call calc_tank2
+;------------------------- 
+ 
+;----------------------------
+	popa
 endm DataIntialization	
+
+drawframe macro
+pusha
+
+;Frame
+mov word ptr StartPointX, 0d
+mov word ptr StartPointY, 0d
+mov word ptr EndPointX, 639d
+mov word ptr EndPointY,0d
+mov linecolor,3
+call DrawLine
+
+mov word ptr StartPointX, 0d
+mov word ptr StartPointY, 359d
+mov word ptr EndPointX, 639d
+mov word ptr EndPointY,359d
+mov linecolor,3
+call DrawLine
+
+mov word ptr StartPointX, 0d
+mov word ptr StartPointY, 0d
+mov word ptr EndPointX, 0d
+mov word ptr EndPointY,459d
+mov linecolor,3
+call DrawLine
+
+mov word ptr StartPointX, 639d
+mov word ptr StartPointY, 0d
+mov word ptr EndPointX, 639d
+mov word ptr EndPointY,459d
+mov linecolor,3
+call DrawLine
+
+popa
+
+endm drawframe
