@@ -30,6 +30,8 @@ DataIntialization macro
 	mov SecondNameLastScore,0d
 	mov whichlvl,0d
 	mov word ptr coll_detect,0
+	mov word ptr leftplayerchatingamepos,011bh
+	mov word ptr rightplayerchatingamepos ,291bh
 	
 	   
 	mov RChatinv,0

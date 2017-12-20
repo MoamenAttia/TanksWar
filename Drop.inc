@@ -68,7 +68,7 @@ placing:
    cmp dh,07d
    jbe position2
    cmp dh,11d
-   jmp position3
+   jbe position3
    jmp position4
    ;//////////////////////////////////////
     position1:

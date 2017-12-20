@@ -11,7 +11,7 @@ include ReloadLivesScore.inc
 include UpdateStatus.inc  
 include Chat.inc
 include Intialization.inc
-;include Drop.inc
+include Drop.inc
 
 .model meduim
 .stack 64d
@@ -301,26 +301,26 @@ input_and_flowcontrol proc near
     pusha   
     
     drawframe     
-  ;  mov al,RGameinv
-;    cmp al,0
-;    je imowner5
-;    
-   ; mov al,whichlvl 
-   ; cmp al,1
-   ; jne notlvl111     
-         ; Drop GiftsX,GiftsY,tank2,tank1
-   ; notlvl111:                                      
-    ; jmp Dropend
-    ; imowner5: 
+    mov al,RGameinv
+    cmp al,0
+    je imowner5
     
-   ; mov al,whichlvl 
-   ; cmp al,1
-   ; jne notlvl1111     
-         ; Drop GiftsX,GiftsY,tank1,tank2
-   ; notlvl1111:                                
-   ; maplvldonee:
+    mov al,whichlvl 
+    cmp al,1
+    jne notlvl111     
+          Drop GiftsX,GiftsY,tank2,tank1
+    notlvl111:                                      
+     jmp Dropend
+     imowner5: 
+    
+    mov al,whichlvl 
+    cmp al,1
+    jne notlvl1111     
+          Drop GiftsX,GiftsY,tank1,tank2
+    notlvl1111:                                
+    maplvldonee:
           
-    ; Dropend:
+     Dropend:
     
   
     mov ah,1d
@@ -431,6 +431,11 @@ input_and_flowcontrol proc near
     no_move_user:  
                         
 remotebuffer:
+	makesurethesentisrecived:
+		mov dx,3fdh
+		in al,dx
+		and al,00100000b
+	jz makesurethesentisrecived
 
 	mov dx,3fdh
 	in al,dx
