@@ -1,43 +1,12 @@
 include CheckT1.inc
 include CheckT2.inc
-
 ;Drop
 Drop macro GiftsX,GiftsY,Tank1,Tank2
 local shiftrightX,shiftleftX,shiftrightY,shiftleftY,LOOPS,outerloop,innerloop,checks,placing,Position1,Position2,Position3,Position4
 local firstgift,secondgift,thirdgift,fourthgift,black,lightCyan,lightblue,start,maybeSecond,maybeThird,maybeFourth,DefinitelyFifth
-local label3,draw,label,label2,firstBlack,secondblack,thirdblack,FourthBlack,removeblack,imowner,firstbyteend,tryagain,tryagain1
-local secondbyteend,imowner2
-	pusha
+local label3,draw,label,label2,firstBlack,secondblack,thirdblack,FourthBlack,removeblack,imowner,tryagain,tryagain1,randomtimesent
+	pusha                   
 	
-	mov al,RGameinv
-    cmp al,0
-    je imowner
-    ;here iam not owner
-	tryagain1:
-	recive byte
-	mov al,byte
-	cmp al,iwillsendRandomTime
-	jne tryagain1
-	mov byte,oksendit
-	send byte
-	recive byte
-	mov al,byte
-	mov randomtime,al
-	jmp firstbyteend
-    imowner:
-    ;here i am owner
-		tryagain:	
-		mov al,iwillsendRandomTime
-		mov byte,al
-		send byte
-		recive byte
-		mov al,byte
-		cmp al,oksendit
-		jne tryagain
-    firstbyteend:                     
-	
-
-
  mov bx,offset GiftsX  
  mov Si,offset GiftsY
 ;'''''''''''''''''''''''''''''''''''''''''''''''
@@ -46,286 +15,287 @@ checks:
 	Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
 	jmp LOOPS
 placing:
-   push ax
-   mov ah,2ch
-   int 21h
-   pop ax
-   and dh,00001111b
-
+	push ax
+	mov ah,2ch
+	int 21h
+	pop ax
+	and dh,00001111b
+	
 	mov al,RGameinv
 	cmp al,0
-	je imowner2
+	je imowner
 	;here iam not owner
+	recive randomtime
 	mov dh,randomtime
-	jmp secondbyteend
-	imowner2:
+	jmp randomtimesent
+	imowner:
 	;here i am owner 
 	mov byte,dh ;sending time
 	send byte
-	secondbyteend: 
-   cmp dh,03d
-   jbe position1
-   cmp dh,07d
-   jbe position2
-   cmp dh,11d
-   jbe position3
-   jmp position4
-   ;//////////////////////////////////////
-    position1:
-    mov bx,offset GiftsX  
-    mov Si,offset GiftsY  
-	
-    mov word ptr [bx],600d
-    mov word ptr [bx+2],610d
-    mov word ptr [bx+4],605d
-    mov word ptr [bx+6],11b
- 
-    mov word ptr [bx+8],5d
-    mov word ptr [bx+10],15d
-    mov word ptr [bx+12],10d
-    mov word ptr [bx+14],11b
-   
-    mov word ptr [bx+16],150d
-    mov word ptr [bx+18],160d
-    mov word ptr [bx+20],155d
-    mov word ptr [bx+22],11b
-    
-    mov word ptr [bx+24],460d
-    mov word ptr [bx+26],470d
-    mov word ptr [bx+28],465d
-    mov word ptr [bx+30],11b
-    
-    mov word ptr [bx+32],315d
-    mov word ptr [bx+34],325d
-    mov word ptr [bx+36],320d
-    mov word ptr [bx+38],11b
-    
-    
-  
-    mov word ptr [si],315d
-    mov word ptr [si+2],325d
-    mov word ptr [si+4],320d
-    mov word ptr [si+6],11b
-    
-    
-    mov word ptr [si+8],5d
-    mov word ptr [si+10],15d
-    mov word ptr [si+12],10d
-    mov word ptr [si+14],11b
-    
-    
-    mov word ptr [si+16],170d
-    mov word ptr [si+18],180d
-    mov word ptr [si+20],175d
-    mov word ptr [si+22],11b
-    
-    mov word ptr [si+24],170d
-    mov word ptr [si+26],180d
-    mov word ptr [si+28],175d
-    mov word ptr [si+30],11b
-    
-    mov word ptr [si+32],50d
-    mov word ptr [si+34],60d
-    mov word ptr [si+36],55d
-    mov word ptr [si+38],11b
-   
-Check_Passing_Through_Tank1 GiftsX,GiftsY,Tank1
-Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2	
-	jmp LOOPS
-;   ; //////////////////////// 
-position2:
-   mov bx,offset GiftsX  
-   mov Si,offset GiftsY
-    
+	randomtimesent: 
 
-    mov word ptr [bx],5d
-    mov word ptr [bx+2],15d
-    mov word ptr [bx+4],10d
-    mov word ptr [bx+6],11b
-    
-    
-    mov word ptr [bx+8],600d
-    mov word ptr [bx+10],610d
-    mov word ptr [bx+12],605d
-    mov word ptr [bx+14],11b
-    
-    mov word ptr [bx+16],5d
-    mov word ptr [bx+18],15d
-    mov word ptr [bx+20],10d
-    mov word ptr [bx+22],11b
-    
-    mov word ptr [bx+24],600d
-    mov word ptr [bx+26],610d
-    mov word ptr [bx+28],605d
-    mov word ptr [bx+30],11b
-    
-    mov word ptr [bx+32],315d
-    mov word ptr [bx+34],325d
-    mov word ptr [bx+36],320d
-    mov word ptr [bx+38],11b
-    
-    
-    
-    mov word ptr [si],5d
-    mov word ptr [si+2],15d
-    mov word ptr [si+4],10d
-    mov word ptr [si+6],11b
-    
-    
-    mov word ptr [si+8],5d
-    mov word ptr [si+10],15d
-    mov word ptr [si+12],10d
-    mov word ptr [si+14],11b
-    
-    
-    mov word ptr [si+16],315d
-    mov word ptr [si+18],325d
-    mov word ptr [si+20],320d
-    mov word ptr [si+22],11b
-    
-    mov word ptr [si+24],315d
-    mov word ptr [si+26],325d
-    mov word ptr [si+28],320d
-    mov word ptr [si+30],11b
-    
-    mov word ptr [si+32],170d
-    mov word ptr [si+34],180d
-    mov word ptr [si+36],175d
-    mov word ptr [si+38],11b 
-Check_Passing_Through_Tank1 GiftsX,GiftsY,Tank1
-Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
-	jmp LOOPS
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    position3:
-     mov bx,offset GiftsX  
-      mov Si,offset GiftsY
-   
-    mov word ptr[bx],600d
-    mov word ptr[bx+2],610d
-    mov word ptr[bx+4],605d
-    mov word ptr[bx+6],11b
-    
-    
-    mov word ptr[bx+8],5d
-    mov word ptr[bx+10],15d
-    mov word ptr[bx+12],10d
-    mov word ptr[bx+14],11b
-    
-    mov word ptr[bx+16],280d
-    mov word ptr[bx+18],290d
-    mov word ptr[bx+20],285d
-    mov word ptr[bx+22],11b
-    
-    mov word ptr[bx+24],505d
-    mov word ptr[bx+26],515d
-    mov word ptr[bx+28],510d
-    mov word ptr[bx+30],11b
-    
-    mov word ptr[bx+32],400d
-    mov word ptr[bx+34],410d
-    mov word ptr[bx+36],405d
-    mov word ptr[bx+38],11b
-    
-    
-    
-    mov word ptr[si],5d
-    mov word ptr[si+2],15d
-    mov word ptr[si+4],10d                            
-    mov word ptr[si+6],11b
-    
-    
-    mov word ptr[si+8],315d
-    mov word ptr[si+10],325d
-    mov word ptr[si+12],320d
+	cmp dh,03d
+	jbe position1
+	cmp dh,07d
+	jbe position2
+	cmp dh,11d
+	jbe position3
+	jmp position4
+	;//////////////////////////////////////
+	position1:
+	mov bx,offset GiftsX  
+	mov Si,offset GiftsY  
+
+	mov word ptr [bx],600d
+	mov word ptr [bx+2],610d
+	mov word ptr [bx+4],605d
+	mov word ptr [bx+6],11b
+
+	mov word ptr [bx+8],5d
+	mov word ptr [bx+10],15d
+	mov word ptr [bx+12],10d
+	mov word ptr [bx+14],11b
+
+	mov word ptr [bx+16],150d
+	mov word ptr [bx+18],160d
+	mov word ptr [bx+20],155d
+	mov word ptr [bx+22],11b
+
+	mov word ptr [bx+24],460d
+	mov word ptr [bx+26],470d
+	mov word ptr [bx+28],465d
+	mov word ptr [bx+30],11b
+
+	mov word ptr [bx+32],315d
+	mov word ptr [bx+34],325d
+	mov word ptr [bx+36],320d
+	mov word ptr [bx+38],11b
+
+
+
+	mov word ptr [si],315d
+	mov word ptr [si+2],325d
+	mov word ptr [si+4],320d
+	mov word ptr [si+6],11b
+
+
+	mov word ptr [si+8],5d
+	mov word ptr [si+10],15d
+	mov word ptr [si+12],10d
 	mov word ptr [si+14],11b
-     
-  
-   mov word ptr[si+16],60d
-   mov word ptr[si+18],70d
-   mov word ptr[si+20],65d
-   mov word ptr[si+22],11b
-   
-   mov word ptr[si+24],280d
-   mov word ptr[si+26],290d
-   mov word ptr[si+28],285d
-   mov word ptr[si+30],11b
-   
-    mov word ptr[si+32],60d
-    mov word ptr[si+34],70d
-    mov word ptr[si+36],65d
-    mov word ptr[si+38],11b
-    
-Check_Passing_Through_Tank1 GiftsX,GiftsY,Tank1
-Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
-jmp LOOPS
-position4: 
-    mov bx,offset GiftsX  
-    mov Si,offset GiftsY
-    mov word ptr [bx],75d
-    mov word ptr [bx+2],85d
-    mov word ptr [bx+4],80d
-    mov word ptr [bx+6],11b
-    
-    
-    mov word ptr [bx+8],555d
-    mov word ptr [bx+10],565d
-    mov word ptr [bx+12],560d
-    mov word ptr [bx+14],11b
-    
-    mov word ptr [bx+16],315d
-    mov word ptr [bx+18],325d
-    mov word ptr [bx+20],320d
-    mov word ptr [bx+22],11b
-    
-    mov word ptr [bx+24],315d
-    mov word ptr [bx+26],325d
-    mov word ptr [bx+28],320d
-    mov word ptr [bx+30],11b
-    
-    mov word ptr [bx+32],315d
-    mov word ptr [bx+34],325d
-    mov word ptr [bx+36],320d
-    mov word ptr [bx+38],11b
-    
-    
-    
-    mov word ptr [si],175d
-    mov word ptr [si+2],185d
-    mov word ptr [si+4],180d
-    mov word ptr [si+6],11b
-    
-    
-    mov word ptr [si+8],175d
-    mov word ptr [si+10],185d
-    mov word ptr [si+12],180d
-    mov word ptr [si+14],11b
-    
-    
-    mov word ptr [si+16],170d
-    mov word ptr [si+18],180d
-    mov word ptr [si+20],175d
-    mov word ptr [si+22],11b
-    
-    mov word ptr [si+24],50d
-    mov word ptr [si+26],60d
-    mov word ptr [si+28],55d
-    mov word ptr [si+30],11b
-    
-    mov word ptr [si+32],305d
-    mov word ptr [si+34],315d
-    mov word ptr [si+36],310d
-    mov word ptr [si+38],11b 
-Check_Passing_Through_Tank1 GiftsX,GiftsY,Tank1
-Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2	
-  
-  
+
+
+	mov word ptr [si+16],170d
+	mov word ptr [si+18],180d
+	mov word ptr [si+20],175d
+	mov word ptr [si+22],11b
+
+	mov word ptr [si+24],170d
+	mov word ptr [si+26],180d
+	mov word ptr [si+28],175d
+	mov word ptr [si+30],11b
+
+	mov word ptr [si+32],50d
+	mov word ptr [si+34],60d
+	mov word ptr [si+36],55d
+	mov word ptr [si+38],11b
+
+	Check_Passing_Through_Tank1 GiftsX,GiftsY,Tank1
+	Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2	
+	jmp LOOPS
+	;   ; //////////////////////// 
+	position2:
+	mov bx,offset GiftsX  
+	mov Si,offset GiftsY
+
+
+	mov word ptr [bx],5d
+	mov word ptr [bx+2],15d
+	mov word ptr [bx+4],10d
+	mov word ptr [bx+6],11b
+
+
+	mov word ptr [bx+8],600d
+	mov word ptr [bx+10],610d
+	mov word ptr [bx+12],605d
+	mov word ptr [bx+14],11b
+
+	mov word ptr [bx+16],5d
+	mov word ptr [bx+18],15d
+	mov word ptr [bx+20],10d
+	mov word ptr [bx+22],11b
+
+	mov word ptr [bx+24],600d
+	mov word ptr [bx+26],610d
+	mov word ptr [bx+28],605d
+	mov word ptr [bx+30],11b
+
+	mov word ptr [bx+32],315d
+	mov word ptr [bx+34],325d
+	mov word ptr [bx+36],320d
+	mov word ptr [bx+38],11b
+
+
+
+	mov word ptr [si],5d
+	mov word ptr [si+2],15d
+	mov word ptr [si+4],10d
+	mov word ptr [si+6],11b
+
+
+	mov word ptr [si+8],5d
+	mov word ptr [si+10],15d
+	mov word ptr [si+12],10d
+	mov word ptr [si+14],11b
+
+
+	mov word ptr [si+16],315d
+	mov word ptr [si+18],325d
+	mov word ptr [si+20],320d
+	mov word ptr [si+22],11b
+
+	mov word ptr [si+24],315d
+	mov word ptr [si+26],325d
+	mov word ptr [si+28],320d
+	mov word ptr [si+30],11b
+
+	mov word ptr [si+32],170d
+	mov word ptr [si+34],180d
+	mov word ptr [si+36],175d
+	mov word ptr [si+38],11b 
+	Check_Passing_Through_Tank1 GiftsX,GiftsY,Tank1
+	Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
+	jmp LOOPS
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	position3:
+	 mov bx,offset GiftsX  
+	  mov Si,offset GiftsY
+
+	mov word ptr[bx],600d
+	mov word ptr[bx+2],610d
+	mov word ptr[bx+4],605d
+	mov word ptr[bx+6],11b
+
+
+	mov word ptr[bx+8],5d
+	mov word ptr[bx+10],15d
+	mov word ptr[bx+12],10d
+	mov word ptr[bx+14],11b
+
+	mov word ptr[bx+16],280d
+	mov word ptr[bx+18],290d
+	mov word ptr[bx+20],285d
+	mov word ptr[bx+22],11b
+
+	mov word ptr[bx+24],505d
+	mov word ptr[bx+26],515d
+	mov word ptr[bx+28],510d
+	mov word ptr[bx+30],11b
+
+	mov word ptr[bx+32],400d
+	mov word ptr[bx+34],410d
+	mov word ptr[bx+36],405d
+	mov word ptr[bx+38],11b
+
+
+	mov word ptr[si],5d
+	mov word ptr[si+2],15d
+	mov word ptr[si+4],10d                            
+	mov word ptr[si+6],11b
+
+
+	mov word ptr[si+8],315d
+	mov word ptr[si+10],325d
+	mov word ptr[si+12],320d
+	mov word ptr [si+14],11b
+	 
+
+	mov word ptr[si+16],60d
+	mov word ptr[si+18],70d
+	mov word ptr[si+20],65d
+	mov word ptr[si+22],11b
+
+	mov word ptr[si+24],280d
+	mov word ptr[si+26],290d
+	mov word ptr[si+28],285d
+	mov word ptr[si+30],11b
+
+	mov word ptr[si+32],60d
+	mov word ptr[si+34],70d
+	mov word ptr[si+36],65d
+	mov word ptr[si+38],11b
+
+	Check_Passing_Through_Tank1 GiftsX,GiftsY,Tank1
+	Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
+	jmp LOOPS
+	position4: 
+	mov bx,offset GiftsX  
+	mov Si,offset GiftsY
+	mov word ptr [bx],75d
+	mov word ptr [bx+2],85d
+	mov word ptr [bx+4],80d
+	mov word ptr [bx+6],11b
+
+
+	mov word ptr [bx+8],555d
+	mov word ptr [bx+10],565d
+	mov word ptr [bx+12],560d
+	mov word ptr [bx+14],11b
+
+	mov word ptr [bx+16],315d
+	mov word ptr [bx+18],325d
+	mov word ptr [bx+20],320d
+	mov word ptr [bx+22],11b
+
+	mov word ptr [bx+24],315d
+	mov word ptr [bx+26],325d
+	mov word ptr [bx+28],320d
+	mov word ptr [bx+30],11b
+
+	mov word ptr [bx+32],315d
+	mov word ptr [bx+34],325d
+	mov word ptr [bx+36],320d
+	mov word ptr [bx+38],11b
+
+
+
+	mov word ptr [si],175d
+	mov word ptr [si+2],185d
+	mov word ptr [si+4],180d
+	mov word ptr [si+6],11b
+
+
+	mov word ptr [si+8],175d
+	mov word ptr [si+10],185d
+	mov word ptr [si+12],180d
+	mov word ptr [si+14],11b
+
+
+	mov word ptr [si+16],170d
+	mov word ptr [si+18],180d
+	mov word ptr [si+20],175d
+	mov word ptr [si+22],11b
+
+	mov word ptr [si+24],50d
+	mov word ptr [si+26],60d
+	mov word ptr [si+28],55d
+	mov word ptr [si+30],11b
+
+	mov word ptr [si+32],305d
+	mov word ptr [si+34],315d
+	mov word ptr [si+36],310d
+	mov word ptr [si+38],11b 
+	Check_Passing_Through_Tank1 GiftsX,GiftsY,Tank1
+	Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2	
+
+
 	LOOPS: 
 	 mov bx,offset GiftsX  
-    mov Si,offset GiftsY 
-	
+	mov Si,offset GiftsY 
+
 	mov di,01d
 	outerloop:
-	
+
 	cmp di,1
 	je firstGift
 	jmp maybeSecond
@@ -340,7 +310,7 @@ Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
 	mov al,1011b
 	jmp label3
 
-    maybeSecond:
+	maybeSecond:
 	cmp di,2
 	je SecondGift
 	jmp maybeThird
@@ -378,11 +348,11 @@ Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
 	je Black
 	jmp lightCyan
 
-	
+
 	label3:
 	mov cx,[bx]
 	mov dx,[si] 
-	
+
 	innerloop:
 	push ax 
 	push bx 
@@ -404,10 +374,10 @@ Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
 	draw:
 	pop bx
 	pop ax
-	
+
 	push bx
 	mov bh,00
-    mov ah,0ch
+	mov ah,0ch
 	int 10h
 	pop bx
 	inc cx
@@ -426,7 +396,7 @@ Check_Passing_Through_Tank2 GiftsX,GiftsY,Tank2
 	inc di 
 	cmp di,05d
 	jbe outerloop
-	
+
 	mov bx,offset GiftsX
 	mov Si,offset GiftsY
 	cmp [bx+6],00b

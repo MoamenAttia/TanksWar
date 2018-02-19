@@ -149,18 +149,15 @@ right equ 4Dh  ;scan code
 left  equ 4Bh  ;scan code
 up    equ 48h  ;scan code
 down  equ 50h  ;scan code
-shoot_Space equ 39h  ;scan code
+space equ 39h  ;scan code
 Enter_key equ 1Ch   ;scan code
 one equ 02h ;scan code
 two equ 03h ;scan code
 ChatByte equ 0CCh 
 GameByte equ 0aah
 ExitByte equ 0eeh  
-iwillsendRandomTime equ 0bbh
-oksendit equ   0ffh
+nothingbyte equ 0bbh
 randomtime db 0   
-
-
 RChatinv db 0
 Rgameinv db 0
 Rexitinv db 0
@@ -198,93 +195,8 @@ DataIntialization
     ProcessingAnswers
 	
 ;---------
-                         
-                         
-  playgame:   
-   clearscreenvm
-
-   mov al,whichlvl 
-   cmp al,1
-   jne notlvl1     
-        SetMap 
-        jmp maplvldone
-   notlvl1:  
-        SetMap2  
-    jmp maplvldone                               
-   maplvldone:
-   
-   
-   
-    mov al,RGameinv
-    cmp al,0
-    je imowner1
-    ;here iam not owner
-    MoveCursor 41d,23d
-    jmp cursorend1
-    imowner1:
-    ;here i am owner       
-    MoveCursor 1,23d      
-    cursorend1:
-   Display Player1Name
-   
-    mov al,RGameinv
-    cmp al,0
-    je imowner2
-    ;here iam not owner
-     MoveCursor 1,23d
-    jmp cursorend2
-    imowner2:
-    ;here i am owner           
-    MoveCursor 41d,23d
-    cursorend2:                     
-   Display Player2Name 
-   
-   ;--------
-   MoveCursor 1d,29d
-   Display BackToMainMenuMess 
-   ;--------
-   
-    mov al,RGameinv
-    cmp al,0
-    je imowner3
-    ;here iam not owner
-    MoveCursor 41d,25d
-    jmp cursorend3
-    imowner3:
-    ;here i am owner       
-    MoveCursor 1,25d 
-    cursorend3:
-    
-   Display Bullets
-   mov cx,5
-   mov ah,9 	;Display
-   mov bh,0 	;Page 0
-   mov al,0FEH  ;Letter D
-   mov bl,0Ah ;Green (A) on white(F) background
-   int 10h   
-   
-   
-    mov al,RGameinv
-    cmp al,0
-    je imowner4
-    ;here iam not owner
-    MoveCursor 1,25d
-    jmp cursorend4
-    imowner4:
-    ;here i am owner       
-     MoveCursor 41d,25d  
-    cursorend4:         
-             
-      
-   Display Bullets
-   mov cx,5
-   mov ah,9 	;Display
-   mov bh,0 	;Page 0
-   mov al,0FEH  ;Letter D
-   mov bl,0Ah ;Green (A) on white(F) background
-   int 10h            
-                            
-
+playgame:   
+	StartGame                           
    tankswar:     
      call input_and_flowcontrol    
      UpdateStatus
@@ -299,33 +211,20 @@ main endp
 
 input_and_flowcontrol proc near
     pusha   
-    
-    drawframe     
-    mov al,RGameinv
-    cmp al,0
-    je imowner5
-    
-    mov al,whichlvl 
+    drawframe 
+	mov al,whichlvl 
     cmp al,1
     jne notlvl111     
-          Drop GiftsX,GiftsY,tank2,tank1
-    notlvl111:                                      
-     jmp Dropend
-     imowner5: 
-    
-    mov al,whichlvl 
-    cmp al,1
-    jne notlvl1111     
           Drop GiftsX,GiftsY,tank1,tank2
-    notlvl1111:                                
-    maplvldonee:
-          
-     Dropend:
-    
-  
+		  jmp Dropend
+    notlvl111:
+		;using lvl2 drop
+	Dropend:
+
     mov ah,1d
     int 16h 
     jnz con  
+	send nothingbyte
     jmp remotebuffer 
     con:                                  
     ;check if f444444444444444444444444444
@@ -357,7 +256,7 @@ input_and_flowcontrol proc near
         jmp remotebuffer 
     notenterpress:
 
-    cmp ah,shoot_Space
+    cmp ah,space
     jnz noshoot
         mov al,RGameinv
         cmp al,0
@@ -384,13 +283,10 @@ input_and_flowcontrol proc near
     cmp ah,up
     jz moveuser
     cmp ah,down
-    jz moveuser
-                    
+    jz moveuser              
     jmp no_move_user    
     moveuser: 
       
-   
-    
     mov al,RGameinv
     cmp al,0   
     push ax
@@ -431,19 +327,10 @@ input_and_flowcontrol proc near
     no_move_user:  
                         
 remotebuffer:
-	makesurethesentisrecived:
-		mov dx,3fdh
-		in al,dx
-		and al,00100000b
-	jz makesurethesentisrecived
-
-	mov dx,3fdh
-	in al,dx
-	and al,00000001b
-	jz nothingrecived
-	mov dx,3f8h
-	in al,dx     
-	mov ah,al  
+	recive byte
+	mov ah,byte
+	cmp ah,nothingbyte
+	je nothingrecived
     cmp ah,chatbyte
     jne notchatbyte
         mov al,rchatingame
@@ -458,8 +345,6 @@ remotebuffer:
      mov al,rchatingame
      cmp al,1 
      je chatingame  
-     
-     
     ;chec exitttttttttttttttttttttttttttttttttttttttttt 
     ;cehck if chaaaaaaaaaaaat byte and RChatInGame Flag 
     cmp ah,exitbyte
@@ -469,7 +354,7 @@ remotebuffer:
         endgamewithscore
     notexitbyte:
                  
-    cmp ah,shoot_Space
+    cmp ah,space
     jnz noshoot_
         mov al,RGameinv
         cmp al,1
@@ -533,11 +418,22 @@ nothingrecived:
     mov ah,1d
     int 16h 
     jz connnnn  
+		cmp ah,enter_key
+		je connnnn
+		cmp ah,left
+		je connnnn
+		cmp ah,right
+		je connnnn
+		cmp ah,up
+		je connnnn
+		cmp ah,down
+		je connnnn	
+		cmp ah,space
+		je connnnn			
         mov ah,0h
         int 16h
     connnnn: 
     ;-----------
-      
     call calc_centre
     call calc_square
     ;------------ 
@@ -553,8 +449,6 @@ nothingrecived:
     mov bx, offset shots1
     mov di, offset tank2
     call process_shots 
-    
-    
     ;------------ 
      ; wait int
      mov cx,0  
@@ -562,14 +456,32 @@ nothingrecived:
      mov ah,86h
      int 15h       
     ;----------
-    
+	
+	
     mov bx, offset shots1
     add bx,4
     call moveshots ;mov shots and clear old shots the from screen 
     mov bx, offset shots2
     add bx,4    
-    call moveshots ;mov shots and clear old shots the from screen    
-    
+    call moveshots ;mov shots and clear old shots the from screen   
+
+
+;confirm each loop done 
+
+    mov al,RGameinv
+    cmp al,0
+    je imowner__
+		send nothingbyte
+		ensure_send_is_recived:
+		mov dx,3fdh
+		in al,dx
+		and al,00100000b
+	jz ensure_send_is_recived
+    jmp iterationend
+    imowner__:
+    ;here i am owner       
+   	recive byte
+    iterationend:
     popa
     ret
 input_and_flowcontrol endp    

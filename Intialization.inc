@@ -189,3 +189,90 @@ call DrawLine
 popa
 
 endm drawframe
+
+
+
+StartGame macro
+  clearscreenvm
+local maplvldone,imowner1,cursorend1,imowner2,cursorend2,imowner3,cursorend3,imowner4,cursorend4
+
+   mov al,whichlvl 
+   cmp al,1
+   jne notlvl1     
+        SetMap 
+        jmp maplvldone
+   notlvl1:  
+        SetMap2  
+    jmp maplvldone                               
+   maplvldone:
+   
+   
+    mov al,RGameinv
+    cmp al,0
+    je imowner1
+    ;here iam not owner
+    MoveCursor 41d,23d
+    jmp cursorend1
+    imowner1:
+    ;here i am owner       
+    MoveCursor 1,23d      
+    cursorend1:
+   Display Player1Name
+   
+    mov al,RGameinv
+    cmp al,0
+    je imowner2
+    ;here iam not owner
+     MoveCursor 1,23d
+    jmp cursorend2
+    imowner2:
+    ;here i am owner           
+    MoveCursor 41d,23d
+    cursorend2:                     
+   Display Player2Name 
+   
+   ;--------
+   MoveCursor 1d,29d
+   Display BackToMainMenuMess 
+   ;--------
+   
+    mov al,RGameinv
+    cmp al,0
+    je imowner3
+    ;here iam not owner
+    MoveCursor 41d,25d
+    jmp cursorend3
+    imowner3:
+    ;here i am owner       
+    MoveCursor 1,25d 
+    cursorend3:
+    
+   Display Bullets
+   mov cx,5
+   mov ah,9 	;Display
+   mov bh,0 	;Page 0
+   mov al,0FEH  ;Letter D
+   mov bl,0Ah ;Green (A) on white(F) background
+   int 10h   
+   
+   
+    mov al,RGameinv
+    cmp al,0
+    je imowner4
+    ;here iam not owner
+    MoveCursor 1,25d
+    jmp cursorend4
+    imowner4:
+    ;here i am owner       
+     MoveCursor 41d,25d  
+    cursorend4:         
+             
+      
+   Display Bullets
+   mov cx,5
+   mov ah,9 	;Display
+   mov bh,0 	;Page 0
+   mov al,0FEH  ;Letter D
+   mov bl,0Ah ;Green (A) on white(F) background
+   int 10h            
+ endm StartGame
